@@ -4,6 +4,8 @@
 	import Topbar from '~/components/Topbar.svelte';
 	import { isLoaded, predictedColor, rootRem, userId } from '~/store';
 	import Article from '~/components/article/Article.svelte';
+	import ArticleEs from '~/components/workshop/ArticleEs.svelte';
+	import { language } from '~/workshop/i18n';
 	import { onMount } from 'svelte';
 	import { Spinner } from 'flowbite-svelte';
 	import Alert from '~/components/Alert.svelte';
@@ -90,7 +92,11 @@ import '~/workshop/presentation.css';
 		</main>
 	</div>
 	<div class="article h-auto w-full">
-		<Article></Article>
+		{#if $language === 'es'}
+			<ArticleEs />
+		{:else}
+			<Article />
+		{/if}
 	</div>
 </div>
 
