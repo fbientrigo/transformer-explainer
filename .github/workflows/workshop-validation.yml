@@ -30,4 +30,5 @@ jobs:
       - name: Svelte/TypeScript
         run: npm run check
       - name: Production build
+        if: ${{ !cancelled() }}
         run: npm run build
