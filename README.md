@@ -1,3 +1,5 @@
+> **Fork educativo en español (trabajo en curso):** [Roadmap](docs/workshop-roadmap.md) · [Arquitectura modular](docs/workshop-architecture.md) · [Meta futura de entrenamiento](docs/tiny-model-training-vision.md). Esta adaptación conserva las atribuciones al proyecto original y la licencia MIT.
+
 # Transformer Explainer: Interactive Learning of Text-Generative Models
 
 Transformer Explainer is an interactive visualization tool designed to help anyone learn how Transformer-based models like GPT work. It runs a live GPT-2 model right in your browser, allowing you to experiment with your own text and observe in real time how internal components and operations of the Transformer work together to predict the next tokens. Try Transformer Explainer at http://poloclub.github.io/transformer-explainer and watch a demo video on YouTube https://youtu.be/TFUc41G2ikY.<br/><br/>
