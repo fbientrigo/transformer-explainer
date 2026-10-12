@@ -5,6 +5,10 @@ on:
     branches: [feat/workshop-es-modular-m0]
   workflow_dispatch:
 
+concurrency:
+  group: workshop-lockfile-sync
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -29,5 +33,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "chore(lockfile): resolve Vite 6 and Svelte plugin compatibility"
+            git fetch origin feat/workshop-es-modular-m0
+            git rebase origin/feat/workshop-es-modular-m0
             git push origin HEAD:feat/workshop-es-modular-m0
           fi
