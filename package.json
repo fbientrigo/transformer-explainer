@@ -11,7 +11,8 @@
 		"format": "prettier --write .",
 		"deploy": "gh-pages -d build --nojekyll",
 		"deploy-temp": "gh-pages -d build --nojekyll --repo https://github.com/aereeeee/te-temp.git",
-		"check:workshop": "tsc --noEmit -p tsconfig.workshop.json"
+		"check:workshop": "tsc --noEmit -p tsconfig.workshop.json",
+		"test:workshop": "node --test scripts/workshop-check.test.mjs"
 	},
 	"devDependencies": {
 		"@neoconfetti/svelte": "^1.0.0",
