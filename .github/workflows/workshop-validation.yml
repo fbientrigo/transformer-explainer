@@ -29,4 +29,5 @@ jobs:
       - name: Workshop TypeScript (strict)
         run: npm run check:workshop
       - name: Production build
+        if: ${{ !cancelled() }}
         run: npm run build
