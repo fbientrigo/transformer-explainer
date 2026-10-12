@@ -26,8 +26,7 @@ jobs:
       - name: Install
         # Temporary resolution while regenerating the committed package lock.
         run: npm install --no-audit --no-fund
-      - name: Svelte/TypeScript
-        run: npm run check
+      - name: Workshop TypeScript (strict)
+        run: npm run check:workshop
       - name: Production build
-        if: ${{ !cancelled() }}
         run: npm run build
