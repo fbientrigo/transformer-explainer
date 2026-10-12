@@ -19,6 +19,13 @@ Objetivo del fork: enseñanza en español mediante visualizaciones interactivas 
 - Para clases presenciales, proporcionar una ruta offline/precalculada y evitar recursos pesados en el arranque.
 - Preservar licencia, crédito al Polo Club of Data Science y enlaces al artículo científico original.
 
+## Estado verificado (12 oct 2026)
+- **M0:** GitHub Actions ejecutó correctamente instalación reproducible (`npm ci`), tipos estrictos para `src/workshop/**/*.ts` y build de producción; run [38292557402](https://github.com/fbientrigo/transformer-explainer/actions/runs/38292557402).
+- **M1, iteración inicial:** 20 secciones didácticas localizadas en `src/workshop/lesson/book.es.ts`, artículo educativo español independiente y selector de idioma. **Es una adaptación didáctica**, no traducción literal y exhaustiva del artículo original ni de todos los popovers del diagrama.
+- **CI de regresión:** `npm run test:workshop` verifica cobertura de 20 IDs, contenido estático y carga ONNX a petición. Requiere aprobación de su propio CI antes de merge.
+- **Deuda técnica heredada:** `npm run check` del repositorio completo no está en verde (~499 diagnósticos en una corrida previa). La validación obligatoria actual se acota explícitamente a TypeScript nuevo, invariantes y compilación; la deuda global debe tratarse por separado sin desactivar el chequeo original.
+- **Revisión manual pendiente:** proyector, interacción real en navegador, red lenta/offline, descarga voluntaria y generación de texto propio.
+
 ## Validaciones M0 pendientes
 - CI inicial: `npm ci` falla antes de compilar por conflicto **heredado**: Vite 5.4.21 frente a `@sveltejs/vite-plugin-svelte` 6.2.4 (requiere Vite >=6.3). Temporalmente CI usa `--legacy-peer-deps` para intentar `check`/`build`; actualizar Vite y lockfile en un PR dedicado. No considerar esto una solución definitiva ni afirmar build verde hasta comprobarlo.
 - Comprobar manualmente 5 ejemplos existentes, navegación con flechas/Escape, selector de idioma y carga voluntaria de GPT-2.
