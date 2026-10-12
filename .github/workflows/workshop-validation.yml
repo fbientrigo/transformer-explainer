@@ -27,6 +27,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Workshop TypeScript (strict)
         run: npm run check:workshop
+      - name: Workshop invariants
+        run: npm run test:workshop
       - name: Production build
         if: ${{ !cancelled() }}
         run: npm run build
