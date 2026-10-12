@@ -3,9 +3,13 @@
 	import { fade } from 'svelte/transition';
 	import { textbookCurrentPage } from '~/store';
 	import { textPages } from '~/utils/textbookPages';
+	import { language } from '~/workshop/i18n';
+	import { bookEs } from '~/workshop/lesson/book.es';
 	import TextbookNavigation from './TextbookNavigation.svelte';
 
 	export let onClose: () => void;
+
+	$: localizedPages = $language === 'es' ? textPages.map((page) => ({ ...page, ...(bookEs[page.id] || {}) })) : textPages;
 
 	let isMouseInCard = false;
 	let mousePosition = { x: 0, y: 0 };
@@ -256,7 +260,7 @@
 		<div class="card-header">
 			<div class="flex w-full items-center justify-between">
 				<h3 class="text-lg font-semibold text-gray-900">
-					{textPages[$textbookCurrentPage].title}
+					{localizedPages[$textbookCurrentPage].title}
 				</h3>
 				<Button color="light" size="xs" class="close-btn" on:click={handleClose}>✕</Button>
 			</div>
@@ -264,7 +268,7 @@
 		<div class="card-body">
 			<div class="text-carousel">
 				<div class="carousel-content">
-					{#each textPages as page, index}
+					{#each localizedPages as page, index}
 						<div class="carousel-slide" class:active={$textbookCurrentPage === index}>
 							<div class="textbook-content">
 								{#if page.component}
@@ -277,7 +281,7 @@
 					{/each}
 				</div>
 
-				<TextbookNavigation {textPages} {isMouseInCard} {isLeftSide} />
+				<TextbookNavigation textPages={localizedPages} {isMouseInCard} {isLeftSide} />
 			</div>
 		</div>
 	</div>
