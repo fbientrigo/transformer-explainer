@@ -20,7 +20,7 @@ Objetivo del fork: enseñanza en español mediante visualizaciones interactivas 
 - Preservar licencia, crédito al Polo Club of Data Science y enlaces al artículo científico original.
 
 ## Validaciones M0 pendientes
-- No hay compilación verificada en este cambio: ejecutar en CI/Codex `npm ci && npm run check && npm run build`.
+- CI inicial: `npm ci` falla antes de compilar por conflicto **heredado**: Vite 5.4.21 frente a `@sveltejs/vite-plugin-svelte` 6.2.4 (requiere Vite >=6.3). Temporalmente CI usa `--legacy-peer-deps` para intentar `check`/`build`; actualizar Vite y lockfile en un PR dedicado. No considerar esto una solución definitiva ni afirmar build verde hasta comprobarlo.
 - Comprobar manualmente 5 ejemplos existentes, navegación con flechas/Escape, selector de idioma y carga voluntaria de GPT-2.
 - Comprobar que texto libre no usa activaciones antiguas en modo demostración.
 - Si el build falla por problemas heredados, separar defectos preexistentes de los del fork.
