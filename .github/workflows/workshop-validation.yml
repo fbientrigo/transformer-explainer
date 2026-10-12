@@ -24,7 +24,9 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - name: Install
-        run: npm ci --no-audit
+        # Upstream lockfile has vite@5 vs vite-plugin-svelte@6 peer conflict.
+        # Temporary CI workaround; resolve versions in a separate dependency PR.
+        run: npm ci --no-audit --legacy-peer-deps
       - name: Svelte/TypeScript
         run: npm run check
       - name: Production build
