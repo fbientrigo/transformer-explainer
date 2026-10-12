@@ -1,0 +1,6 @@
+/* Reversible teaching layer: leave existing visualizations unchanged. */
+#app.workshopPresentation .article{display:none}
+#app.workshopPresentation #landing{height:100vh}
+#app.workshopPresentation #main{height:100%}
+#app.workshopPresentation .nodes{padding-bottom:9rem}
+@media(prefers-reduced-motion:reduce){#app.workshopPresentation *{animation-duration:.01ms!important;transition-duration:.01ms!important}}

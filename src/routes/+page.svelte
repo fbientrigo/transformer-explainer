@@ -43,11 +43,22 @@
 	import BlockTransition from '~/components/BlockTransition.svelte';
 	import QKV from '~/components/QKV.svelte';
 	import Textbook from '~/components/textbook/Textbook.svelte';
+import { requestModelLoad, modelLoadError } from '~/workshop/state';
 
 	ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
 	ort.env.logLevel = 'error';
 
 	let active = false;
+	let modelLoadStarted = false;
+	// Demo data is used until the visitor explicitly loads GPT-2.
+	$: if (active && $requestModelLoad && !$isMobile && !$modelSession && !modelLoadStarted) {
+		modelLoadStarted = true;
+		void fetchModel().catch((error: unknown) => {
+			modelLoadError.set(error instanceof Error ? error.message : String(error));
+			requestModelLoad.set(false);
+			modelLoadStarted = false;
+		});
+	}
 	let appStartTime = Date.now();
 
 	// fetch model
@@ -57,9 +68,7 @@
 
 		const unsubscribe = subscribeInputs(gpt2Tokenizer);
 
-		if (!$isMobile) {
-			await fetchModel();
-		}
+		// Do not download the 63 ONNX chunks on initial page load.
 
 		return unsubscribe;
 	});

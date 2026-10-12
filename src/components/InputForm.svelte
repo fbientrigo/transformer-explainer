@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { ui } from '~/workshop/i18n';
+	import { requestModelLoad } from '~/workshop/state';
+	import { modelSession } from '~/store';
 	import { Dropdown, DropdownItem, ButtonGroup } from 'flowbite-svelte';
 	import Temperature from './Temperature.svelte';
 
@@ -129,6 +132,7 @@
 
 	$: isLoading = $isFetchingModel || $isModelRunning;
 	$: disabled =
+		!$modelSession ||
 		$isFetchingModel ||
 		// $isModelRunning ||
 		$expandedBlock.id !== null ||
@@ -147,7 +151,7 @@
 				class:selectDisabled
 				class="select-button inline-flex shrink-0 items-center justify-center border border-s-0 border-gray-200 bg-white px-3 py-2 text-center text-xs font-medium text-gray-900 first:rounded-s-lg first:border-s last:rounded-e-lg"
 			>
-				Examples<ChevronDownOutline class="pointer-events-none h-4 w-4 text-gray-500" />
+				{$ui.examples}<ChevronDownOutline class="pointer-events-none h-4 w-4 text-gray-500" />
 			</button>
 			<Dropdown bind:open={dropdownOpen} class="example-dropdown">
 				{#each inputTextExample as text, index}
@@ -178,9 +182,9 @@
 				<div class={`editable ${!$isModelRunning ? 'w-full' : ''}`}>
 					<div
 						bind:this={inputRef}
-						contenteditable={!disabled}
+						contenteditable={!disabled && !!$modelSession}
 						class="text-box"
-						placeholder="Test your own input text"
+						placeholder={$ui.placeholder}
 						on:focus={onFocusInput}
 						on:input={onInput}
 						on:keydown={handleKeyDown}
@@ -212,14 +216,14 @@
 				{/if}
 				{#if $isMobile}
 					<span class="helper-text"
-						>Try the examples. Please use a desktop computer to input GPT-2 prompts directly.</span
+						>{$ui.mobileHint}</span
 					>
 				{:else if $isLoaded && $isFetchingModel}
 					<span class="helper-text"
-						>Try the examples while GPT-2 model is being downloaded (600MB)</span
+						>{$requestModelLoad ? $ui.downloading : $ui.demoHint}</span
 					>
 				{:else if exceedLimit}
-					<span class="helper-text">You can enter up to {wordLimit} words.</span>
+					<span class="helper-text">{$ui.wordLimit} {wordLimit} {$ui.words}.</span>
 				{/if}
 			</div>
 		</ButtonGroup>
@@ -233,7 +237,7 @@
 			type="submit"
 			on:click={handleSubmit}
 		>
-			Generate
+			{$ui.generate}
 		</button>
 	</form>
 	<div class="parameters" data-click="input-parameters">
