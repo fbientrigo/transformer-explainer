@@ -5,10 +5,17 @@
   import SoftmaxExercise from './SoftmaxExercise.svelte';
   import { presentationMode, presentationStep, requestModelLoad, modelLoadError } from '~/workshop/state';
 
+  let isFullscreen = false;
   $: slide = slides[$presentationStep];
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void document.documentElement.requestFullscreen?.();
+  }
 
   function togglePresentation() {
     if (!$presentationMode) { presentationStep.set(0); isTextbookOpen.set(false); }
+    if ($presentationMode && document.fullscreenElement) void document.exitFullscreen();
     presentationMode.update((on) => !on);
   }
   function move(delta: number) { presentationStep.update((n) => Math.max(0, Math.min(slides.length-1, n+delta))); }
@@ -23,7 +30,7 @@
   }
 </script>
 
-<svelte:window on:keydown={keydown} />
+<svelte:window on:keydown={keydown} on:fullscreenchange={() => isFullscreen = !!document.fullscreenElement} />
 <div class="workshop-ui">
   {#if $presentationMode}
     <section class="workshop-slide" aria-live="polite" aria-label={$ui.slide}>
@@ -42,6 +49,9 @@
   <div class="workshop-controls" role="group" aria-label="Workshop">
     <button on:click={togglePresentation}>{$presentationMode ? $ui.explore : $ui.present}</button>
     <button on:click={toggleLanguage}>{$language === 'es' ? 'EN' : 'ES'}</button>
+    {#if $presentationMode}
+      <button on:click={toggleFullscreen} aria-pressed={isFullscreen}>{isFullscreen ? $ui.exitFullscreen : $ui.fullscreen}</button>
+    {/if}
     {#if $modelSession}
       <span>{$ui.modelReady}</span>
     {:else if $requestModelLoad}
