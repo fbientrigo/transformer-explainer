@@ -1,5 +1,29 @@
 > **Fork educativo en español para presentaciones (trabajo en curso):** [Roadmap](docs/workshop-roadmap.md) · [Arquitectura modular](docs/workshop-architecture.md) · [Meta futura de entrenamiento](docs/tiny-model-training-vision.md). Esta adaptación conserva las atribuciones al proyecto original y la licencia MIT.
 
+### Preparar el entorno después de clonar (Python opcional)
+
+El entorno virtual **no se almacena en Git**: cada equipo lo crea localmente y queda excluido por `.gitignore`. Requiere Python 3.10 o superior y no necesita conexión a Internet ni instala PyTorch.
+
+En Windows (PowerShell):
+
+```powershell
+git clone https://github.com/fbientrigo/transformer-explainer.git
+cd transformer-explainer
+py -3 tools/setup_venv.py
+.\\.venv\\Scripts\\python.exe tools\\tiny_model.py --dry-run
+```
+
+En Linux/macOS:
+
+```bash
+git clone https://github.com/fbientrigo/transformer-explainer.git
+cd transformer-explainer
+python3 tools/setup_venv.py
+.venv/bin/python tools/tiny_model.py --dry-run
+```
+
+El script es **idempotente** y puede comprobarse con `python tools/setup_venv.py --check`. No hace falta activar el entorno si ejecutas su intérprete directamente. Para entrenar, instala PyTorch *solo dentro de* `.venv` con una versión CPU/CUDA adecuada para tu equipo, siguiendo [la guía de modelos locales](docs/local-models.md). El frontend utiliza Node.js y `npm ci` por separado.
+
 ### Presentar y cargar un modelo propio (opcional)
 
 Este fork permite explorar GPT-2 con ejemplos precalculados **sin descargar pesos ni tokenizadores externos**. La opción **Modelo propio** abre un snapshot JSON de atención y logits reales producido por un modelo local. La web no necesita Python, PyTorch, GPU, servidor de inferencia ni cuenta externa.
@@ -43,9 +67,9 @@ _Proceedings of the 2026 CHI Conference on Human Factors in Computing Systems._
 #### Steps
 
 ```bash
-git clone https://github.com/poloclub/transformer-explainer.git
+git clone https://github.com/fbientrigo/transformer-explainer.git
 cd transformer-explainer
-npm install
+npm ci
 npm run dev
 ```
 

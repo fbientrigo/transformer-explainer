@@ -35,18 +35,21 @@ El punto de extensión es `SnapshotAdapter`, en `src/workshop/model/contract.ts`
 
 ## Cómo usar (Windows / Linux, sin servidor Python)
 
-1. Clona el repositorio y ejecuta `npm ci` y `npm run dev`. No necesitas PyTorch para presentar ejemplos o inspeccionar archivos.
-2. Comprueba sin instalar PyTorch: `python tools/tiny_model.py --dry-run`.
-3. Para entrenar **opcionalmente** en CPU/GPU local, instala PyTorch en un entorno Python aparte desde su sitio oficial, eligiendo el build apropiado para el driver CUDA de tu equipo. PyTorch es la **única dependencia Python no estándar** de este programa; no utiliza Transformers/Hugging Face, ONNX ni servicios web.
-4. Ejecuta:
+1. Clona el fork y ejecuta `npm ci` y `npm run dev` para el frontend. No necesitas PyTorch para presentar ejemplos o inspeccionar archivos.
+2. Crea un entorno aislado **después del clone** (el `.venv` generado no se versiona): `py -3 tools/setup_venv.py` en Windows o `python3 tools/setup_venv.py` en Linux/macOS. Usa `--check` para comprobar que sigue válido. No descarga nada.
+3. Prueba el entrenador sin dependencias con `.venv/bin/python tools/tiny_model.py --dry-run` (Linux/macOS) o `.\\.venv\\Scripts\\python.exe tools\\tiny_model.py --dry-run` (PowerShell).
+4. Para entrenar **opcionalmente** en CPU/GPU local, instala PyTorch **dentro de `.venv`**, desde su sitio oficial y eligiendo el build adecuado para el sistema y el driver CUDA. Usa siempre `.venv/bin/python -m pip ...` o `.\\.venv\\Scripts\\python.exe -m pip ...`; no se modifica tu Python global. PyTorch es la **única dependencia Python no estándar** de este programa; no utiliza Transformers/Hugging Face, ONNX ni servicios web.
+5. Con el entorno activado, o llamando a su intérprete directamente, ejecuta:
 
 ```bash
-python tools/tiny_model.py --device auto --steps 25 --output exports/ejemplo.snapshot.json
+.venv/bin/python tools/tiny_model.py --device auto --steps 25 --output exports/ejemplo.snapshot.json
 ```
 
-5. En la presentación, pulsa **Modelo propio** y carga `exports/ejemplo.snapshot.json`. El navegador lee el fichero local sin ejecutar código Python ni cargar ningún modelo.
+6. En la presentación, pulsa **Modelo propio** y carga `exports/ejemplo.snapshot.json`. El navegador lee el fichero local sin ejecutar código Python ni cargar ningún modelo.
 
 Para otro corpus, usa `--text corpus.txt` (UTF-8, máximo 2 MB) y un `--prompt` compuesto por caracteres presentes en el corpus. Puedes usar `--device cpu` en salas sin CUDA.
+
+En Windows sustituye `.venv/bin/python` por `.\\.venv\\Scripts\\python.exe`. Si usas PowerShell puedes activar el entorno con `.\\.venv\\Scripts\\Activate.ps1`, pero **no es necesario** activarlo para usar el script.
 
 ## Límites por diseño
 
