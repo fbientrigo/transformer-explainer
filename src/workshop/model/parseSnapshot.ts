@@ -5,7 +5,7 @@ function record(value: unknown, name: string): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 function integer(value: unknown, low: number, high: number, label: string): number {
-  if (!Number.isSafeInteger(value) || (value as number) < low || (value as number) > high) throw new Error(label + ': entero fuera de límites');
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < low || value > high) throw new Error(label + ': entero fuera de límites');
   return value as number;
 }
 function real(value: unknown, label: string): number {
