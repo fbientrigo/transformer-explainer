@@ -26,6 +26,20 @@ try {
   await present.waitFor({ timeout: 45_000 });
   assert.equal(modelRequests.length, 0, 'Demo downloaded large ONNX weights automatically');
   assert.equal(tokenizerRequests.length, 0, 'Demo contacted Hugging Face for a tokenizer');
+  // The second snapshot must load dynamically, still without GPT-2 runtime assets.
+  const examplesButton = page.locator('[data-click="dropdown-btn"]');
+  await examplesButton.waitFor();
+  await page.waitForFunction(() => {
+    const control = document.querySelector('[data-click="dropdown-btn"]');
+    return control && !control.disabled;
+  }, { timeout: 45_000 });
+  await examplesButton.click();
+  const nextExample = page.locator('[data-click="dropdown-item-1"]');
+  await nextExample.waitFor({ timeout: 15_000 });
+  await nextExample.click();
+  await page.getByText('Artificial Intelligence is transforming the', { exact: false }).first().waitFor();
+  assert.equal(modelRequests.length, 0);
+  assert.equal(tokenizerRequests.length, 0);
   await present.click();
   await page.getByText('Diapositiva 1 / 6').waitFor();
   const next = page.locator('.workshop-nav button').last();
