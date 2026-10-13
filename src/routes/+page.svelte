@@ -37,7 +37,7 @@
 	import { fetchAndMergeChunks } from '~/utils/fetchChunks';
 	import WeightPopovers from '~/components/WeightPopovers.svelte';
 	import { fade } from 'svelte/transition';
-		import { ex0, ex1, ex2, ex3, ex4 } from '~/constants/examples';
+		import { ex0 } from '~/constants/examples/ex0.js';
 	import BlockTransition from '~/components/BlockTransition.svelte';
 	import QKV from '~/components/QKV.svelte';
 	import Textbook from '~/components/textbook/Textbook.svelte';
@@ -110,22 +110,43 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 	};
 
 	// Subscribe inputs
-	const cachedDataMap = [ex0, ex1, ex2, ex3, ex4];
+	// Import only the first cached snapshot at startup. Other ~1.6 MB examples load on selection.
+	const cachedDataMap: Record<number, any> = { 0: ex0 };
+	const cachedLoaders: Record<number, () => Promise<any>> = {
+		1: () => import('~/constants/examples/ex1.js').then(({ ex1 }) => ex1),
+		2: () => import('~/constants/examples/ex2.js').then(({ ex2 }) => ex2),
+		3: () => import('~/constants/examples/ex3.js').then(({ ex3 }) => ex3),
+		4: () => import('~/constants/examples/ex4.js').then(({ ex4 }) => ex4)
+	};
+	const loadCachedData = async (index: number): Promise<any> => {
+		if (cachedDataMap[index]) return cachedDataMap[index];
+		const loader = cachedLoaders[index];
+		if (!loader) throw new Error('Unknown cached example index');
+		const data = await loader();
+		cachedDataMap[index] = data;
+		return data;
+	};
 	const subscribeInputs = () => {
-		const runModelOrCache = () => {
+		let inputRevision = 0;
+		const runModelOrCache = async () => {
+			const revision = ++inputRevision;
 			if ($isFetchingModel || !$modelSession || !activeTokenizer) {
-				const cachedData = cachedDataMap[$selectedExampleIdx];
-
-				fakeRunWithCachedData({
-					cachedData,
-					tokenizer: cachedTokenDecoder(cachedData),
-					temperature: $temperature,
-					sampling: $sampling
-				});
+				try {
+					const cachedData = await loadCachedData($selectedExampleIdx);
+					if (revision !== inputRevision) return; // ignore stale asynchronous selections
+					void fakeRunWithCachedData({
+						cachedData,
+						tokenizer: cachedTokenDecoder(cachedData),
+						temperature: $temperature,
+						sampling: $sampling
+					});
+				} catch (error) {
+					modelLoadError.set(error instanceof Error ? error.message : String(error));
+				}
 				return;
 			}
-			// run model when input has changed
-			runModel({
+			// Real inference requires the explicitly loaded tokenizer and ONNX session.
+			void runModel({
 				tokenizer: activeTokenizer,
 				input: $inputText.trim(),
 				temperature: $temperature,
@@ -143,6 +164,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 				initialTemperature = false;
 				return;
 			}
+			if (!activeTokenizer && !cachedDataMap[$selectedExampleIdx]) return;
 			adjustTemperature({
 				tokenizer: activeTokenizer ?? cachedTokenDecoder(cachedDataMap[$selectedExampleIdx]),
 				logits: $modelData.logits,
@@ -157,6 +179,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 				initialSampling = false;
 				return;
 			}
+			if (!activeTokenizer && !cachedDataMap[$selectedExampleIdx]) return;
 			adjustTemperature({
 				tokenizer: activeTokenizer ?? cachedTokenDecoder(cachedDataMap[$selectedExampleIdx]),
 				logits: $modelData.logits,

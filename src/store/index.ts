@@ -2,7 +2,7 @@ import { writable, derived, readable } from 'svelte/store';
 import type * as ort from 'onnxruntime-web';
 import tailwindConfig from '../../tailwind.config';
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { ex0 } from '~/constants/examples';
+import { ex0 } from '~/constants/examples/ex0.js';
 import { textPages } from '~/utils/textbookPages';
 
 const { theme } = resolveConfig(tailwindConfig);
