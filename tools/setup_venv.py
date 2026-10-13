@@ -94,8 +94,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Python: {VENV_PYTHON}")
     print("No network access and no third-party packages required.")
     if os.name == "nt":
-        print(r"PowerShell: .\\.venv\\Scripts\\Activate.ps1")
-        print(r"Or directly: .\\.venv\\Scripts\\python.exe tools\\tiny_model.py --dry-run")
+        print(r"PowerShell: .\.venv\Scripts\Activate.ps1")
+        print(r"Or directly: .\.venv\Scripts\python.exe tools\tiny_model.py --dry-run")
     else:
         print("Shell: source .venv/bin/activate")
         print("Or directly: .venv/bin/python tools/tiny_model.py --dry-run")
