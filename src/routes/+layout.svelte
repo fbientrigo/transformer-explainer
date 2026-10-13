@@ -4,10 +4,14 @@
 	import Topbar from '~/components/Topbar.svelte';
 	import { isLoaded, predictedColor, rootRem, userId } from '~/store';
 	import Article from '~/components/article/Article.svelte';
+	import ArticleEs from '~/components/workshop/ArticleEs.svelte';
+	import { language } from '~/workshop/i18n';
 	import { onMount } from 'svelte';
 	import { Spinner } from 'flowbite-svelte';
 	import Alert from '~/components/Alert.svelte';
-	import GTM from '~/utils/gtm.svelte';
+import WorkshopToolbar from '~/components/workshop/WorkshopToolbar.svelte';
+import { presentationMode, presentationStep } from '~/workshop/state';
+import '~/workshop/presentation.css';
 	import { page } from '$app/stores';
 
 	let topBarHeight = 0;
@@ -66,9 +70,11 @@
 	};
 </script>
 
-<GTM />
+<WorkshopToolbar />
 <div
 	id="app"
+	class:workshopPresentation={$presentationMode}
+	data-workshop-step={$presentationStep}
 	style={`--min-screen-width:${minScreenWidth}px;--min-column-width:${minColumWidth}px;--predicted-color:${predictedColor};`}
 >
 	<div id="landing">
@@ -84,7 +90,11 @@
 		</main>
 	</div>
 	<div class="article h-auto w-full">
-		<Article></Article>
+		{#if $language === 'es'}
+			<ArticleEs />
+		{:else}
+			<Article />
+		{/if}
 	</div>
 </div>
 

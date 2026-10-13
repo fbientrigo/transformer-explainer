@@ -21,7 +21,7 @@
 		isTextbookOpen,
 		userId
 	} from '~/store';
-	import { PreTrainedTokenizer } from '@xenova/transformers';
+	import type { PreTrainedTokenizer } from '@xenova/transformers';
 	import Sankey from '~/components/Sankey.svelte';
 	import Attention from '~/components/Attention.svelte';
 	import SubsequentBlocks from '~/components/SubsequentBlocks.svelte';
@@ -32,40 +32,50 @@
 	import { onMount } from 'svelte';
 	import classNames from 'classnames';
 	import { base } from '$app/paths';
-	import * as ort from 'onnxruntime-web';
-
+	
 	import { adjustTemperature, runModel, fakeRunWithCachedData } from '~/utils/data';
 	import { fetchAndMergeChunks } from '~/utils/fetchChunks';
 	import WeightPopovers from '~/components/WeightPopovers.svelte';
 	import { fade } from 'svelte/transition';
-	import { AutoTokenizer } from '@xenova/transformers';
-	import { ex0, ex1, ex2, ex3, ex4 } from '~/constants/examples';
+		import { ex0 } from '~/constants/examples/ex0.js';
 	import BlockTransition from '~/components/BlockTransition.svelte';
 	import QKV from '~/components/QKV.svelte';
 	import Textbook from '~/components/textbook/Textbook.svelte';
+import { requestModelLoad, modelLoadError } from '~/workshop/state';
+	import { cachedTokenDecoder } from '~/workshop/model/cachedTokenDecoder';
 
-	ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
-	ort.env.logLevel = 'error';
 
 	let active = false;
+	let modelLoadStarted = false;
+	let activeTokenizer: PreTrainedTokenizer | null = null;
+	// Demo data is used until the visitor explicitly loads GPT-2.
+	$: if (active && $requestModelLoad && !$isMobile && !$modelSession && !modelLoadStarted) {
+		modelLoadStarted = true;
+		void fetchModel().catch((error: unknown) => {
+			modelLoadError.set(error instanceof Error ? error.message : String(error));
+			requestModelLoad.set(false);
+			modelLoadStarted = false;
+		});
+	}
 	let appStartTime = Date.now();
 
 	// fetch model
-	onMount(async () => {
-		const gpt2Tokenizer = await AutoTokenizer.from_pretrained('Xenova/gpt2');
+	onMount(() => {
+		// Synchronous cleanup; cached examples run without a remote tokenizer.
 		active = true;
-
-		const unsubscribe = subscribeInputs(gpt2Tokenizer);
-
-		if (!$isMobile) {
-			await fetchModel();
-		}
-
-		return unsubscribe;
+		return subscribeInputs();
 	});
 
 	// Fetch model onnx
 	const fetchModel = async () => {
+		// Keep the transformer and ONNX runtimes out of the default classroom bundle.
+		const [{ AutoTokenizer }, ort] = await Promise.all([
+			import('@xenova/transformers'),
+			import('onnxruntime-web')
+		]);
+		ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
+		ort.env.logLevel = 'error';
+		const tokenizer = await AutoTokenizer.from_pretrained('Xenova/gpt2');
 		const chunkNum = 63; //TODO: move to model meta
 		const chunkUrls = Array(chunkNum)
 			.fill(0)
@@ -85,6 +95,7 @@
 			// logSeverityLevel: 0
 		});
 
+		activeTokenizer = tokenizer;
 		modelSession.set(session);
 
 		isFetchingModel.set(false);
@@ -99,23 +110,44 @@
 	};
 
 	// Subscribe inputs
-	const cachedDataMap = [ex0, ex1, ex2, ex3, ex4];
-	const subscribeInputs = (tokenizer: PreTrainedTokenizer) => {
-		const runModelOrCache = () => {
-			if ($isFetchingModel || !$modelSession) {
-				const cachedData = cachedDataMap[$selectedExampleIdx];
-
-				fakeRunWithCachedData({
-					cachedData,
-					tokenizer,
-					temperature: $temperature,
-					sampling: $sampling
-				});
+	// Import only the first cached snapshot at startup. Other ~1.6 MB examples load on selection.
+	const cachedDataMap: Record<number, any> = { 0: ex0 };
+	const cachedLoaders: Record<number, () => Promise<any>> = {
+		1: () => import('~/constants/examples/ex1.js').then(({ ex1 }) => ex1),
+		2: () => import('~/constants/examples/ex2.js').then(({ ex2 }) => ex2),
+		3: () => import('~/constants/examples/ex3.js').then(({ ex3 }) => ex3),
+		4: () => import('~/constants/examples/ex4.js').then(({ ex4 }) => ex4)
+	};
+	const loadCachedData = async (index: number): Promise<any> => {
+		if (cachedDataMap[index]) return cachedDataMap[index];
+		const loader = cachedLoaders[index];
+		if (!loader) throw new Error('Unknown cached example index');
+		const data = await loader();
+		cachedDataMap[index] = data;
+		return data;
+	};
+	const subscribeInputs = () => {
+		let inputRevision = 0;
+		const runModelOrCache = async () => {
+			const revision = ++inputRevision;
+			if ($isFetchingModel || !$modelSession || !activeTokenizer) {
+				try {
+					const cachedData = await loadCachedData($selectedExampleIdx);
+					if (revision !== inputRevision) return; // ignore stale asynchronous selections
+					void fakeRunWithCachedData({
+						cachedData,
+						tokenizer: cachedTokenDecoder(cachedData),
+						temperature: $temperature,
+						sampling: $sampling
+					});
+				} catch (error) {
+					modelLoadError.set(error instanceof Error ? error.message : String(error));
+				}
 				return;
 			}
-			// run model when input has changed
-			runModel({
-				tokenizer,
+			// Real inference requires the explicitly loaded tokenizer and ONNX session.
+			void runModel({
+				tokenizer: activeTokenizer,
 				input: $inputText.trim(),
 				temperature: $temperature,
 				sampling: $sampling
@@ -132,8 +164,9 @@
 				initialTemperature = false;
 				return;
 			}
+			if (!activeTokenizer && !cachedDataMap[$selectedExampleIdx]) return;
 			adjustTemperature({
-				tokenizer,
+				tokenizer: activeTokenizer ?? cachedTokenDecoder(cachedDataMap[$selectedExampleIdx]),
 				logits: $modelData.logits,
 				temperature: value,
 				sampling: $sampling
@@ -146,8 +179,9 @@
 				initialSampling = false;
 				return;
 			}
+			if (!activeTokenizer && !cachedDataMap[$selectedExampleIdx]) return;
 			adjustTemperature({
-				tokenizer,
+				tokenizer: activeTokenizer ?? cachedTokenDecoder(cachedDataMap[$selectedExampleIdx]),
 				logits: $modelData.logits,
 				temperature: $temperature,
 				sampling: value

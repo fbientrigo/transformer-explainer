@@ -1,5 +1,6 @@
-import { PreTrainedTokenizer } from '@xenova/transformers';
-import * as ort from 'onnxruntime-web';
+import type { PreTrainedTokenizer } from '@xenova/transformers';
+// Cached visualizations only require decoding the displayed candidates.
+type TokenDecoder = Pick<PreTrainedTokenizer, 'decode'>;
 import {
 	modelData,
 	tokens,
@@ -20,7 +21,7 @@ export const fakeRunWithCachedData = async ({
 	sampling
 }: {
 	cachedData: any;
-	tokenizer: PreTrainedTokenizer;
+	tokenizer: TokenDecoder;
 	temperature: number;
 	sampling: Sampling;
 }) => {
@@ -100,7 +101,7 @@ export const adjustTemperature = async ({
 	temperature,
 	sampling
 }: {
-	tokenizer: PreTrainedTokenizer;
+	tokenizer: TokenDecoder;
 	logits: number[];
 	temperature: number;
 	sampling: Sampling;
@@ -125,6 +126,7 @@ export const getTokenization = async (tokenizer: PreTrainedTokenizer, input: str
 
 export const getData = async (token_ids: number[]) => {
 	try {
+		const ort = await import('onnxruntime-web');
 		// Convert token_ids to tensor
 		const inputTensor = new ort.Tensor('int64', token_ids, [1, token_ids.length]);
 
@@ -173,7 +175,7 @@ export const getProbabilities = ({
 	sampling = { type: 'top-k', value: 10 },
 	temperature = 1
 }: {
-	tokenizer: PreTrainedTokenizer;
+	tokenizer: TokenDecoder;
 	logits: number[];
 	sampling: Sampling;
 	temperature: number;
@@ -186,7 +188,7 @@ export const getProbabilities = ({
 };
 
 function topKSampling(
-	tokenizer: PreTrainedTokenizer,
+	tokenizer: TokenDecoder,
 	logits: number[],
 	k: number,
 	temperature: number
@@ -232,7 +234,7 @@ function topKSampling(
 }
 
 function topPSampling(
-	tokenizer: PreTrainedTokenizer,
+	tokenizer: TokenDecoder,
 	logits: number[],
 	p: number,
 	temperature: number
