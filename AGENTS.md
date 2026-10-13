@@ -14,7 +14,7 @@ Spanish-first, fast and reliable presentation tool for its presenter (not a stud
 6. Do not build mock tensors or random attention matrices that are presented as real model activations. Label conceptual/illustrative demos clearly.
 7. Later model engines must expose a typed introspection contract; no direct UI dependency on one training framework.
 8. Accessibility: keyboard controls, semantic buttons, reduced motion, readable projection typography, and no unnecessary animation. Maintain browser-only/static hosting; avoid server requirements for base slides.
-9. PyTorch is allowed **only in tools/tiny_model.py** (opt-in local CLI); never add PyTorch, training services, GPU initialization, or model downloads to browser startup. Aim at 4 GB VRAM / 8 GB RAM and benchmark; do not promise hard hardware limits.
+9. Python virtual environments are created per machine using `python tools/setup_venv.py` (stdlib, idempotent, no network), are excluded via `.gitignore`, and must never be committed. PyTorch is allowed **only in tools/tiny_model.py** (opt-in local CLI); never add PyTorch, training services, GPU initialization, or model downloads to browser startup. Aim at 4 GB VRAM / 8 GB RAM and benchmark; do not promise hard hardware limits.
 10. Test `npm ci`, `npm run check`, `npm run build`; verify cached examples and model opt-in in a browser. Record what was not run.
 
 11. Integrate any future model through `src/workshop/model/contract.ts`, an explicit versioned snapshot format and `snapshotAdapters.ts`, never by coercing it into GPT-2's fixed 12×12 tensors. Imported JSON is data only; validate size, schema, shapes, finiteness, normalization and causal masking.
@@ -23,6 +23,7 @@ Spanish-first, fast and reliable presentation tool for its presenter (not a stud
 ## Where to start
 - `docs/workshop-architecture.md` — module boundaries and future model adapter.
 - `docs/workshop-roadmap.md` — milestones and acceptance criteria.
+- `tools/setup_venv.py` — no-network, cross-platform reproducible local `.venv` setup (Python 3.10+).
 - `docs/local-models.md` — implemented optional local tiny Transformer exporter, snapshot contract and hardware budgets.
 - `docs/tiny-model-training-vision.md` — additional long-term training features not yet implemented.
 - Upstream `README.md` and `LICENSE` remain authoritative for credits.
