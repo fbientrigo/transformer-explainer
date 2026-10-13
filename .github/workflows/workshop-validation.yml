@@ -4,12 +4,17 @@ on:
   pull_request:
     paths:
       - 'src/**'
+      - 'scripts/**'
       - 'docs/**'
       - 'AGENTS.md'
       - 'README.md'
       - 'package*.json'
       - '.github/workflows/workshop-validation.yml'
   workflow_dispatch:
+
+concurrency:
+  group: workshop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
