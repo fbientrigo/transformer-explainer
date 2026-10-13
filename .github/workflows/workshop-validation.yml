@@ -32,3 +32,34 @@ jobs:
       - name: Production build
         if: ${{ !cancelled() }}
         run: npm run build
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install locked app
+        run: npm ci --no-audit --no-fund
+      - name: Build production site
+        run: npm run build
+      - name: Install pinned browser test runner
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.55.1
+          npx playwright install --with-deps chromium
+      - name: Run browser smoke
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 &
+          server_pid=$!
+          trap 'kill $server_pid 2>/dev/null || true' EXIT
+          node scripts/workshop-browser-smoke.mjs
+      - name: Upload classroom screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: classroom-browser-smoke
+          path: artifacts/workshop-presentation.png
+          if-no-files-found: ignore
