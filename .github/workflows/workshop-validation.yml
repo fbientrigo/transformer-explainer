@@ -81,3 +81,25 @@ jobs:
           name: classroom-browser-smoke
           path: artifacts/workshop-presentation.png
           if-no-files-found: ignore
+
+  python-venv-windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Create, reuse and verify venv on Windows
+        shell: pwsh
+        run: |
+          python tools/setup_venv.py
+          python tools/setup_venv.py
+          python tools/setup_venv.py --check
+          .\.venv\Scripts\python.exe tools\tiny_model.py --dry-run --steps 2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Ensure environment is ignored by Git
+        shell: pwsh
+        run: |
+          $tracked = git ls-files ".venv/**" "exports/**"
+          if ($tracked) { throw "Virtual environment or exports were accidentally committed" }
