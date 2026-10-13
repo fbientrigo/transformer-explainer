@@ -60,6 +60,7 @@
 	};
 
 	const handleSubmit = (e) => {
+		if (disabled || exceedLimit) return;
 		// Complete any running animation before starting new generation
 		completeCurrentAnimation();
 
@@ -142,7 +143,7 @@
 </script>
 
 <div class="input-area" data-click="input-area">
-	<form class="input-form" data-click="input-form">
+	<form class="input-form" data-click="input-form" on:submit|preventDefault={handleSubmit}>
 		<ButtonGroup class="input-btn-group" size="sm">
 			<button
 				data-click="dropdown-btn"
@@ -235,7 +236,6 @@
 				active: !(disabled || exceedLimit)
 			})}
 			type="submit"
-			on:click={handleSubmit}
 		>
 			{$ui.generate}
 		</button>

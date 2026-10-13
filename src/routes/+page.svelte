@@ -44,12 +44,14 @@
 	import QKV from '~/components/QKV.svelte';
 	import Textbook from '~/components/textbook/Textbook.svelte';
 import { requestModelLoad, modelLoadError } from '~/workshop/state';
+	import { cachedTokenDecoder } from '~/workshop/model/cachedTokenDecoder';
 
 	ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
 	ort.env.logLevel = 'error';
 
 	let active = false;
 	let modelLoadStarted = false;
+	let activeTokenizer: PreTrainedTokenizer | null = null;
 	// Demo data is used until the visitor explicitly loads GPT-2.
 	$: if (active && $requestModelLoad && !$isMobile && !$modelSession && !modelLoadStarted) {
 		modelLoadStarted = true;
@@ -62,19 +64,15 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 	let appStartTime = Date.now();
 
 	// fetch model
-	onMount(async () => {
-		const gpt2Tokenizer = await AutoTokenizer.from_pretrained('Xenova/gpt2');
+	onMount(() => {
+		// Synchronous cleanup; cached examples run without a remote tokenizer.
 		active = true;
-
-		const unsubscribe = subscribeInputs(gpt2Tokenizer);
-
-		// Do not download the 63 ONNX chunks on initial page load.
-
-		return unsubscribe;
+		return subscribeInputs();
 	});
 
 	// Fetch model onnx
 	const fetchModel = async () => {
+		const tokenizer = await AutoTokenizer.from_pretrained('Xenova/gpt2');
 		const chunkNum = 63; //TODO: move to model meta
 		const chunkUrls = Array(chunkNum)
 			.fill(0)
@@ -94,6 +92,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 			// logSeverityLevel: 0
 		});
 
+		activeTokenizer = tokenizer;
 		modelSession.set(session);
 
 		isFetchingModel.set(false);
@@ -109,14 +108,14 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 
 	// Subscribe inputs
 	const cachedDataMap = [ex0, ex1, ex2, ex3, ex4];
-	const subscribeInputs = (tokenizer: PreTrainedTokenizer) => {
+	const subscribeInputs = () => {
 		const runModelOrCache = () => {
-			if ($isFetchingModel || !$modelSession) {
+			if ($isFetchingModel || !$modelSession || !activeTokenizer) {
 				const cachedData = cachedDataMap[$selectedExampleIdx];
 
 				fakeRunWithCachedData({
 					cachedData,
-					tokenizer,
+					tokenizer: cachedTokenDecoder(cachedData),
 					temperature: $temperature,
 					sampling: $sampling
 				});
@@ -124,7 +123,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 			}
 			// run model when input has changed
 			runModel({
-				tokenizer,
+				tokenizer: activeTokenizer,
 				input: $inputText.trim(),
 				temperature: $temperature,
 				sampling: $sampling
@@ -142,7 +141,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 				return;
 			}
 			adjustTemperature({
-				tokenizer,
+				tokenizer: activeTokenizer ?? cachedTokenDecoder(cachedDataMap[$selectedExampleIdx]),
 				logits: $modelData.logits,
 				temperature: value,
 				sampling: $sampling
@@ -156,7 +155,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 				return;
 			}
 			adjustTemperature({
-				tokenizer,
+				tokenizer: activeTokenizer ?? cachedTokenDecoder(cachedDataMap[$selectedExampleIdx]),
 				logits: $modelData.logits,
 				temperature: $temperature,
 				sampling: value

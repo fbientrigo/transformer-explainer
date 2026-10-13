@@ -1,4 +1,6 @@
 import { PreTrainedTokenizer } from '@xenova/transformers';
+// Cached visualizations only require decoding the displayed candidates.
+type TokenDecoder = Pick<PreTrainedTokenizer, 'decode'>;
 import * as ort from 'onnxruntime-web';
 import {
 	modelData,
@@ -20,7 +22,7 @@ export const fakeRunWithCachedData = async ({
 	sampling
 }: {
 	cachedData: any;
-	tokenizer: PreTrainedTokenizer;
+	tokenizer: TokenDecoder;
 	temperature: number;
 	sampling: Sampling;
 }) => {
@@ -100,7 +102,7 @@ export const adjustTemperature = async ({
 	temperature,
 	sampling
 }: {
-	tokenizer: PreTrainedTokenizer;
+	tokenizer: TokenDecoder;
 	logits: number[];
 	temperature: number;
 	sampling: Sampling;
@@ -173,7 +175,7 @@ export const getProbabilities = ({
 	sampling = { type: 'top-k', value: 10 },
 	temperature = 1
 }: {
-	tokenizer: PreTrainedTokenizer;
+	tokenizer: TokenDecoder;
 	logits: number[];
 	sampling: Sampling;
 	temperature: number;
@@ -186,7 +188,7 @@ export const getProbabilities = ({
 };
 
 function topKSampling(
-	tokenizer: PreTrainedTokenizer,
+	tokenizer: TokenDecoder,
 	logits: number[],
 	k: number,
 	temperature: number
@@ -232,7 +234,7 @@ function topKSampling(
 }
 
 function topPSampling(
-	tokenizer: PreTrainedTokenizer,
+	tokenizer: TokenDecoder,
 	logits: number[],
 	p: number,
 	temperature: number
