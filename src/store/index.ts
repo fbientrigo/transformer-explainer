@@ -1,5 +1,5 @@
 import { writable, derived, readable } from 'svelte/store';
-import * as ort from 'onnxruntime-web';
+import type * as ort from 'onnxruntime-web';
 import tailwindConfig from '../../tailwind.config';
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { ex0 } from '~/constants/examples';

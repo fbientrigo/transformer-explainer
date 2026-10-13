@@ -1,7 +1,6 @@
-import { PreTrainedTokenizer } from '@xenova/transformers';
+import type { PreTrainedTokenizer } from '@xenova/transformers';
 // Cached visualizations only require decoding the displayed candidates.
 type TokenDecoder = Pick<PreTrainedTokenizer, 'decode'>;
-import * as ort from 'onnxruntime-web';
 import {
 	modelData,
 	tokens,
@@ -127,6 +126,7 @@ export const getTokenization = async (tokenizer: PreTrainedTokenizer, input: str
 
 export const getData = async (token_ids: number[]) => {
 	try {
+		const ort = await import('onnxruntime-web');
 		// Convert token_ids to tensor
 		const inputTensor = new ort.Tensor('int64', token_ids, [1, token_ids.length]);
 

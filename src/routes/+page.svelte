@@ -21,7 +21,7 @@
 		isTextbookOpen,
 		userId
 	} from '~/store';
-	import { PreTrainedTokenizer } from '@xenova/transformers';
+	import type { PreTrainedTokenizer } from '@xenova/transformers';
 	import Sankey from '~/components/Sankey.svelte';
 	import Attention from '~/components/Attention.svelte';
 	import SubsequentBlocks from '~/components/SubsequentBlocks.svelte';
@@ -32,22 +32,18 @@
 	import { onMount } from 'svelte';
 	import classNames from 'classnames';
 	import { base } from '$app/paths';
-	import * as ort from 'onnxruntime-web';
-
+	
 	import { adjustTemperature, runModel, fakeRunWithCachedData } from '~/utils/data';
 	import { fetchAndMergeChunks } from '~/utils/fetchChunks';
 	import WeightPopovers from '~/components/WeightPopovers.svelte';
 	import { fade } from 'svelte/transition';
-	import { AutoTokenizer } from '@xenova/transformers';
-	import { ex0, ex1, ex2, ex3, ex4 } from '~/constants/examples';
+		import { ex0, ex1, ex2, ex3, ex4 } from '~/constants/examples';
 	import BlockTransition from '~/components/BlockTransition.svelte';
 	import QKV from '~/components/QKV.svelte';
 	import Textbook from '~/components/textbook/Textbook.svelte';
 import { requestModelLoad, modelLoadError } from '~/workshop/state';
 	import { cachedTokenDecoder } from '~/workshop/model/cachedTokenDecoder';
 
-	ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
-	ort.env.logLevel = 'error';
 
 	let active = false;
 	let modelLoadStarted = false;
@@ -72,6 +68,13 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 
 	// Fetch model onnx
 	const fetchModel = async () => {
+		// Keep the transformer and ONNX runtimes out of the default classroom bundle.
+		const [{ AutoTokenizer }, ort] = await Promise.all([
+			import('@xenova/transformers'),
+			import('onnxruntime-web')
+		]);
+		ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
+		ort.env.logLevel = 'error';
 		const tokenizer = await AutoTokenizer.from_pretrained('Xenova/gpt2');
 		const chunkNum = 63; //TODO: move to model meta
 		const chunkUrls = Array(chunkNum)
