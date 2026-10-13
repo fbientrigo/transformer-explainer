@@ -5,7 +5,9 @@ on:
     paths:
       - 'src/**'
       - 'scripts/**'
+      - 'tools/**'
       - 'docs/**'
+      - 'tsconfig.workshop.json'
       - 'AGENTS.md'
       - 'README.md'
       - 'package*.json'
@@ -34,6 +36,10 @@ jobs:
         run: npm run check:workshop
       - name: Workshop invariants
         run: npm run test:workshop
+      - name: Local trainer syntax and dependency-free dry run
+        run: |
+          python3 -m py_compile tools/tiny_model.py
+          python3 tools/tiny_model.py --dry-run --steps 2
       - name: Production build
         if: ${{ !cancelled() }}
         run: npm run build

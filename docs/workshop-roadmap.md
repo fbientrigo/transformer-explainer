@@ -1,3 +1,9 @@
+## Actualización de alcance (12 octubre 2026)
+
+El uso prioritario es **presentar la arquitectura**, no ofrecer un curso de entrenamiento para estudiantes. Se añadió un piloto mínimo separado: `tools/tiny_model.py` entrena opcionalmente un decoder pequeño en la PC del presentador (PyTorch solo en el CLI), exporta atención y logits reales a un snapshot JSON y `ModelInspector.svelte` visualiza esos datos sin motor externo ni inferencia de red. El formato está versionado en `src/workshop/model/contract.ts`, validado en `parseSnapshot.ts` y registrado en `snapshotAdapters.ts`. Véase `docs/local-models.md`.
+
+**No equivale a terminar M5**: siguen pendientes checkpoints reutilizables, transferencia optimizada de activaciones, experimentos didácticos antes/después y benchmark medido de VRAM/RAM en hardware real. El camino GPT-2 ONNX es opcional, independiente y todavía contiene recursos pesados.
+
 # Roadmap — Transformer Explainer ES
 
 Objetivo del fork: enseñanza en español mediante visualizaciones interactivas para estudiantes sin conocimientos previos de programación. Mantener la autoría y licencia MIT original.

@@ -3,7 +3,7 @@
 This repository is a fork of [poloclub/transformer-explainer](https://github.com/poloclub/transformer-explainer). Retain upstream MIT license, original attribution, research citations and reproducible examples.
 
 ## Product goal
-Spanish-first, fast educational visualization for non-programmers and classroom projection. Future goal: students train a genuinely small Transformer and inspect **its own** internals. Do not mistake this goal for fine-tuning or shrinking the existing GPT-2 visualization.
+Spanish-first, fast and reliable presentation tool for its presenter (not a student-facing training platform). A conservative local PyTorch tiny-decoder exporter is optional; the browser is only a read-only viewer of versioned, validated, real model snapshots. Do not mistake this for fine-tuning or shrinking the existing GPT-2 visualization.
 
 ## Engineering rules
 1. Work in feature branches; never push directly to main. Do not open PRs against upstream by default.
@@ -14,11 +14,15 @@ Spanish-first, fast educational visualization for non-programmers and classroom 
 6. Do not build mock tensors or random attention matrices that are presented as real model activations. Label conceptual/illustrative demos clearly.
 7. Later model engines must expose a typed introspection contract; no direct UI dependency on one training framework.
 8. Accessibility: keyboard controls, semantic buttons, reduced motion, readable projection typography, and no unnecessary animation. Maintain browser-only/static hosting; avoid server requirements for base slides.
-9. Do not introduce Colab, PyTorch, training jobs or large model downloads into default app startup. Training is a long-term optional lab module.
+9. PyTorch is allowed **only in tools/tiny_model.py** (opt-in local CLI); never add PyTorch, training services, GPU initialization, or model downloads to browser startup. Aim at 4 GB VRAM / 8 GB RAM and benchmark; do not promise hard hardware limits.
 10. Test `npm ci`, `npm run check`, `npm run build`; verify cached examples and model opt-in in a browser. Record what was not run.
+
+11. Integrate any future model through `src/workshop/model/contract.ts`, an explicit versioned snapshot format and `snapshotAdapters.ts`, never by coercing it into GPT-2's fixed 12×12 tensors. Imported JSON is data only; validate size, schema, shapes, finiteness, normalization and causal masking.
+12. Do not add remote analytics, web fonts, tracking or new frontend runtime dependencies unless necessary and approved. External GPT-2 inference remains an **optional legacy** path; the presentation and own-model JSON viewer must not require it.
 
 ## Where to start
 - `docs/workshop-architecture.md` — module boundaries and future model adapter.
 - `docs/workshop-roadmap.md` — milestones and acceptance criteria.
-- `docs/tiny-model-training-vision.md` — deferred training laboratory.
+- `docs/local-models.md` — implemented optional local tiny Transformer exporter, snapshot contract and hardware budgets.
+- `docs/tiny-model-training-vision.md` — additional long-term training features not yet implemented.
 - Upstream `README.md` and `LICENSE` remain authoritative for credits.

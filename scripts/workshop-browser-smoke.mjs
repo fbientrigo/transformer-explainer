@@ -59,6 +59,26 @@ try {
   assert.notEqual(before, after, 'Temperature slider did not change');
   await page.getByRole('button', { name: 'EN', exact: true }).click();
   await page.getByText('Experiment · Softmax').waitFor();
+  // Real presenter workflow: load a local model snapshot without any API request.
+  await page.getByRole('button', { name: 'Own model', exact: true }).click();
+  const inspector = page.getByRole('dialog', { name: 'Explore your model' });
+  await inspector.waitFor();
+  const causal = [[1, 0, 0], [0.5, 0.5, 0], [0.2, 0.3, 0.5]];
+  const fixture = {
+    schema: 'workshop.snapshot.v1',
+    model: {id:'browser-fixture', architecture:'decoder-transformer', source:'CI-only-test', tokenizer:'character',
+      layers:1, heads:2, embeddingDim:64, parameterCount:2000},
+    input: {tokens:['a','b','c'], tokenIds:[0,1,2]},
+    layers: [{index:0, attention:[causal,causal]}],
+    output: {candidates:[{token:'a',logit:2},{token:'b',logit:1}], selectedToken:'a'},
+    training: {steps:1,losses:[{step:1,loss:1.5}],device:'cpu'}
+  };
+  await inspector.locator('input[type=file]').setInputFiles({
+    name:'ci-fixture.json', mimeType:'application/json', buffer: Buffer.from(JSON.stringify(fixture))
+  });
+  await inspector.getByText('browser-fixture').waitFor();
+  await inspector.getByText('Relative probabilities ONLY', { exact:false }).waitFor();
+  await inspector.getByRole('button', { name: 'Close' }).click();
   assert.equal(modelRequests.length, 0);
   assert.equal(tokenizerRequests.length, 0);
   await mkdir('artifacts', { recursive: true });
