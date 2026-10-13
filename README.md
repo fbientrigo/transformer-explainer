@@ -67,9 +67,9 @@ _Proceedings of the 2026 CHI Conference on Human Factors in Computing Systems._
 #### Steps
 
 ```bash
-git clone https://github.com/poloclub/transformer-explainer.git
+git clone https://github.com/fbientrigo/transformer-explainer.git
 cd transformer-explainer
-npm install
+npm ci
 npm run dev
 ```
 
