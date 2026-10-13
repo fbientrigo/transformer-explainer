@@ -3,9 +3,11 @@
   import { language, ui } from '~/workshop/i18n';
   import { slides } from '~/workshop/lesson/slides';
   import SoftmaxExercise from './SoftmaxExercise.svelte';
+  import ModelInspector from './ModelInspector.svelte';
   import { presentationMode, presentationStep, requestModelLoad, modelLoadError } from '~/workshop/state';
 
   let isFullscreen = false;
+  let inspectorOpen = false;
   $: slide = slides[$presentationStep];
 
   function toggleFullscreen() {
@@ -14,6 +16,7 @@
   }
 
   function togglePresentation() {
+    if (inspectorOpen) inspectorOpen = false;
     if (!$presentationMode) { presentationStep.set(0); isTextbookOpen.set(false); }
     if ($presentationMode && document.fullscreenElement) void document.exitFullscreen();
     presentationMode.update((on) => !on);
@@ -23,7 +26,7 @@
   function keydown(event: KeyboardEvent) {
     if (!$presentationMode) return;
     const el = event.target;
-    if (el instanceof HTMLElement && (el.isContentEditable || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(el.tagName))) return;
+    if (el instanceof HTMLElement && (el.closest('[data-model-inspector]') || el.isContentEditable || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(el.tagName))) return;
     if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
     if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
     if (event.key === 'Escape') presentationMode.set(false);
@@ -31,6 +34,9 @@
 </script>
 
 <svelte:window on:keydown={keydown} on:fullscreenchange={() => isFullscreen = !!document.fullscreenElement} />
+{#if inspectorOpen}
+  <ModelInspector onClose={() => inspectorOpen = false} />
+{/if}
 <div class="workshop-ui">
   {#if $presentationMode}
     <section class="workshop-slide" aria-live="polite" aria-label={$ui.slide}>
@@ -49,6 +55,7 @@
   <div class="workshop-controls" role="group" aria-label="Workshop">
     <button on:click={togglePresentation}>{$presentationMode ? $ui.explore : $ui.present}</button>
     <button on:click={toggleLanguage}>{$language === 'es' ? 'EN' : 'ES'}</button>
+    <button type="button" aria-pressed={inspectorOpen} on:click={() => inspectorOpen = !inspectorOpen}>{$ui.ownModel}</button>
     {#if $presentationMode}
       <button on:click={toggleFullscreen} aria-pressed={isFullscreen}>{isFullscreen ? $ui.exitFullscreen : $ui.fullscreen}</button>
     {/if}
