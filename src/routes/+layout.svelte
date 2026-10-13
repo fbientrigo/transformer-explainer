@@ -9,7 +9,6 @@
 	import { onMount } from 'svelte';
 	import { Spinner } from 'flowbite-svelte';
 	import Alert from '~/components/Alert.svelte';
-	import GTM from '~/utils/gtm.svelte';
 import WorkshopToolbar from '~/components/workshop/WorkshopToolbar.svelte';
 import { presentationMode, presentationStep } from '~/workshop/state';
 import '~/workshop/presentation.css';
@@ -71,7 +70,6 @@ import '~/workshop/presentation.css';
 	};
 </script>
 
-<GTM />
 <WorkshopToolbar />
 <div
 	id="app"

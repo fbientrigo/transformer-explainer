@@ -105,7 +105,7 @@
 		.logo {
 			flex-shrink: 0;
 			white-space: nowrap;
-			font-family: 'Jersey 10', sans-serif;
+			font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
 			font-optical-sizing: auto;
 			font-style: normal;
