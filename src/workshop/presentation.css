@@ -4,3 +4,16 @@
 #app.workshopPresentation #main{height:100%}
 #app.workshopPresentation .nodes{padding-bottom:9rem}
 @media(prefers-reduced-motion:reduce){#app.workshopPresentation *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Progressively focus on one component while preserving the original diagram. */
+#app.workshopPresentation .steps .step { transition: opacity .2s ease; }
+#app.workshopPresentation[data-workshop-step='1'] .steps .step:not(.embedding),
+#app.workshopPresentation[data-workshop-step='2'] .steps .step:not(.attention),
+#app.workshopPresentation[data-workshop-step='3'] .steps .step:not(.mlp),
+#app.workshopPresentation[data-workshop-step='4'] .steps .step:not(.softmax),
+#app.workshopPresentation[data-workshop-step='5'] .steps .step:not(.softmax) {opacity:.22}
+#app.workshopPresentation[data-workshop-step='1'] .steps .step.embedding,
+#app.workshopPresentation[data-workshop-step='2'] .steps .step.attention,
+#app.workshopPresentation[data-workshop-step='3'] .steps .step.mlp,
+#app.workshopPresentation[data-workshop-step='4'] .steps .step.softmax,
+#app.workshopPresentation[data-workshop-step='5'] .steps .step.softmax {opacity:1}

@@ -2,6 +2,7 @@
   import { isTextbookOpen, modelSession, isMobile } from '~/store';
   import { language, ui } from '~/workshop/i18n';
   import { slides } from '~/workshop/lesson/slides';
+  import SoftmaxExercise from './SoftmaxExercise.svelte';
   import { presentationMode, presentationStep, requestModelLoad, modelLoadError } from '~/workshop/state';
 
   $: slide = slides[$presentationStep];
@@ -15,7 +16,7 @@
   function keydown(event: KeyboardEvent) {
     if (!$presentationMode) return;
     const el = event.target;
-    if (el instanceof HTMLElement && (el.isContentEditable || ['INPUT','TEXTAREA','SELECT'].includes(el.tagName))) return;
+    if (el instanceof HTMLElement && (el.isContentEditable || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(el.tagName))) return;
     if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
     if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
     if (event.key === 'Escape') presentationMode.set(false);
@@ -29,6 +30,9 @@
       <small>{$ui.slide} {$presentationStep+1} / {slides.length}</small>
       <strong>{slide.title[$language]}</strong>
       <p>{slide.body[$language]}</p>
+      {#if slide.id === 'sampling'}
+        <SoftmaxExercise />
+      {/if}
       <nav aria-label={$ui.slide} class="workshop-nav">
         <button disabled={$presentationStep===0} on:click={() => move(-1)}>{$ui.previous}</button>
         <button disabled={$presentationStep===slides.length-1} on:click={() => move(1)}>{$ui.next} →</button>
