@@ -86,8 +86,8 @@ export const temperature = writable(initialTemperature);
 export const sampling = writable<Sampling>({ type: 'top-k', value: 5 });
 
 // Prediction visual
-export const highlightedIndex = writable(null);
-export const finalTokenIndex = writable(null);
+export const highlightedIndex = writable<number | null>(null);
+export const finalTokenIndex = writable<number | null>(null);
 
 // Visual element style
 export const rootRem = 16;
@@ -105,9 +105,9 @@ export const predictedColor = theme.colors.purple[600];
 
 // Interactivity
 export const hoveredPath = writable();
-export const hoveredMatrixCell = writable({ row: null, col: null });
-export const weightPopover = writable();
-export const tooltip = writable();
+export const hoveredMatrixCell = writable<{ row: number | null; col: number | null }>({ row: null, col: null });
+export const weightPopover = writable<'qkv' | 'attention' | 'mlpUp' | 'mlpDown' | 'softmax' | null>(null);
+export const tooltip = writable<string | null>(null);
 
 export const isMobile = readable(false, (set) => {
 	if (typeof window !== 'undefined') {

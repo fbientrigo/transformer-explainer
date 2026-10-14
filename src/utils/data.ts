@@ -11,8 +11,17 @@ import {
 	modelMetaMap
 } from '~/store';
 import { get } from 'svelte/store';
-import { reshapeArray } from './array';
+import { isNumberMatrix, reshapeArray } from './array';
 import { showFlowAnimation } from './animation';
+
+type CachedModelData = ModelData & {
+	prompt: string;
+	tokens: string[];
+	tokenIds: number[];
+	outputs: ModelData['outputs'];
+	probabilities: Probabilities;
+	sampled: Probability;
+};
 
 export const fakeRunWithCachedData = async ({
 	cachedData,
@@ -20,7 +29,7 @@ export const fakeRunWithCachedData = async ({
 	temperature,
 	sampling
 }: {
-	cachedData: any;
+	cachedData: CachedModelData;
 	tokenizer: TokenDecoder;
 	temperature: number;
 	sampling: Sampling;
@@ -83,10 +92,14 @@ export const runModel = async ({
 	}, 0);
 };
 
-const setPredictedTokenForAnimation = (probabilities, sampled, sampling) => {
-	let delay = 10;
-	let topK = probabilities.slice(0, sampling.value);
-	let animationTokens = [...topK, ...topK.slice(sampled.rank).reverse()];
+const _setPredictedTokenForAnimation = (
+	probabilities: Probabilities,
+	sampled: Probability,
+	sampling: Sampling
+) => {
+	const delay = 10;
+	const topK = probabilities.slice(0, sampling.value);
+	const animationTokens = [...topK, ...topK.slice(sampled.rank).reverse()];
 
 	for (let i = 0; i < animationTokens.length; i++) {
 		setTimeout(() => {
@@ -143,15 +156,20 @@ export const getData = async (token_ids: number[]) => {
 		const results = await session.run(feeds);
 
 		// Extract the logits
-		const logits = results['linear_output'].data;
+		const logits = Array.from(results['linear_output'].data, Number);
 
 		// Extract the dictionary values
 		const outputs = targetTensors.reduce(
 			(obj, key) => {
 				const out = results[key];
+				const data = reshapeArray(Array.from(out.data, Number), out.dims);
+				if (!isNumberMatrix(data)) {
+					throw new Error(`Expected ${key} to contain a matrix tensor`);
+				}
 				const processedData = {
-					// ...out,
-					data: reshapeArray([...out.cpuData], out.dims)
+					data,
+					dims: [...out.dims],
+					size: out.size
 				};
 				obj[key] = processedData;
 				return obj;
@@ -164,7 +182,7 @@ export const getData = async (token_ids: number[]) => {
 			outputs
 		};
 	} catch (error) {
-		console.error('Error during inference:', error.message);
+		console.error('Error during inference:', error instanceof Error ? error.message : error);
 		throw error;
 	}
 };

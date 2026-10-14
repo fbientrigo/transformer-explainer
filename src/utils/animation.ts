@@ -12,9 +12,9 @@ const getGradientStops = (className: string, stopIdx = 1) => {
 	);
 };
 const generateGradientAnimation = (
-	tl,
+	tl: GSAPTimeline,
 	gradStop: undefined | SVGStopElement | (SVGStopElement | undefined)[],
-	options: GSAPTweenVars = {}
+	options: Omit<GSAPTweenVars, 'position'> & { position?: gsap.Position } = {}
 ) => {
 	const {
 		color = 'rgba(255,255,255,0)',
@@ -27,12 +27,14 @@ const generateGradientAnimation = (
 
 	const { from = '0%', to = '100%' } = offset;
 
-	const initialColor = Array.isArray(gradStop)
-		? gradStop.map((d) => d.getAttribute('stop-color'))
-		: gradStop.getAttribute('stop-color');
+	const gradStops = (Array.isArray(gradStop) ? gradStop : [gradStop]).filter(
+		(stop): stop is SVGStopElement => stop !== undefined
+	);
+	if (gradStops.length === 0) return;
+	const initialColor = gradStops.map((stop) => stop.getAttribute('stop-color'));
 
 	tl.fromTo(
-		gradStop,
+		gradStops,
 		{ attr: { offset: from, ['stop-color']: color } },
 		{
 			attr: {
@@ -45,11 +47,11 @@ const generateGradientAnimation = (
 		},
 		position
 	).to(
-		gradStop,
+		gradStops,
 		{
 			attr: {
 				offset: to,
-				['stop-color']: (i) => (Array.isArray(gradStop) ? initialColor[i] : initialColor)
+				['stop-color']: (i: number) => initialColor[i] ?? color
 			},
 			duration,
 			ease,
@@ -60,7 +62,7 @@ const generateGradientAnimation = (
 };
 
 const fadeOutColor = theme.colors.gray[100];
-const nodeFadeOutOpacity = 0.2;
+const _nodeFadeOutOpacity = 0.2;
 let flowTimeline: GSAPTimeline;
 
 export const completeCurrentAnimation = () => {
@@ -72,10 +74,10 @@ export const completeCurrentAnimation = () => {
 export const showFlowAnimation = async (tokenLength: number, isNextTokenOnly = true) => {
 	completeCurrentAnimation();
 
-	let isFirstBlock = get(blockIdx) === 0;
-	let isLastBlock = get(blockIdx) === get(modelMeta)?.layer_num - 1;
+	const isFirstBlock = get(blockIdx) === 0;
+	const isLastBlock = get(blockIdx) === get(modelMeta)?.layer_num - 1;
 
-	return new Promise((resolve) => {
+	return new Promise<void>((resolve) => {
 		const tl = gsap.timeline({
 			onStart: () => {
 				isOnAnimation.set(true);
@@ -273,17 +275,22 @@ export const showFlowAnimation = async (tokenLength: number, isNextTokenOnly = t
 		// draw attention matrix mul path
 		// add attention values
 		// ============================
-		const keyPaths = document.querySelectorAll('.sankey-top g.attention path.key-to-attention');
-		const queryPaths = document.querySelectorAll('.sankey-top g.attention path.query-to-attention');
-		const attentionMatrix = document.querySelector('.attention .attention-result');
+		const keyPaths = document.querySelectorAll<SVGPathElement>('.sankey-top g.attention path.key-to-attention');
+		const queryPaths = document.querySelectorAll<SVGPathElement>('.sankey-top g.attention path.query-to-attention');
+		const attentionMatrix = document.querySelector<HTMLElement>('.attention .attention-result');
+
+		if (!attentionMatrix) {
+			flowTimeline = tl;
+			return resolve();
+		}
 
 		if (isNextTokenOnly) {
 			const QKDuration = 0.7;
 			const stagger = Number((QKDuration / tokenLength).toFixed(2));
 
 			[...keyPaths, ...queryPaths].forEach((path) => {
-				path.style.strokeDasharray = 0;
-				path.style.strokeDashoffset = 0;
+				path.style.strokeDasharray = '0';
+				path.style.strokeDashoffset = '0';
 			});
 
 			const lastKeyPath = keyPaths[keyPaths.length - 1];
@@ -291,8 +298,8 @@ export const showFlowAnimation = async (tokenLength: number, isNextTokenOnly = t
 
 			[lastKeyPath, lastQueryPath].forEach((path) => {
 				const length = path.getTotalLength();
-				path.style.strokeDasharray = length;
-				path.style.strokeDashoffset = length;
+				path.style.strokeDasharray = String(length);
+				path.style.strokeDashoffset = String(length);
 			});
 
 			tl.to(lastKeyPath, {
@@ -332,8 +339,8 @@ export const showFlowAnimation = async (tokenLength: number, isNextTokenOnly = t
 
 			[...keyPaths, ...queryPaths].forEach((path) => {
 				const length = path.getTotalLength();
-				path.style.strokeDasharray = length;
-				path.style.strokeDashoffset = length;
+				path.style.strokeDasharray = String(length);
+				path.style.strokeDashoffset = String(length);
 			});
 
 			tl.to(keyPaths, {
@@ -592,7 +599,7 @@ export const showFlowAnimation = async (tokenLength: number, isNextTokenOnly = t
 export const drawResidualLine = (id?: string) => {
 	let residualAnimation: GSAPTween | undefined;
 
-	const connectLine = (paths: any) => {
+	const connectLine = (paths: d3.Selection<d3.BaseType, unknown, HTMLElement, unknown>) => {
 		residualAnimation = gsap.to(paths.nodes(), {
 			strokeDashoffset: -50,
 			duration: 1,

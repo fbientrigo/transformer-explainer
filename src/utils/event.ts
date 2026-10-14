@@ -1,4 +1,4 @@
-export const ga = (name: string, params?: any) => {
+export const ga = (name: string, params?: Record<string, unknown>) => {
 	if (typeof gtag === 'undefined') return;
 	gtag('event', name, params);
 };
@@ -17,7 +17,7 @@ export function scrollToDiv(e: Event, goTo: string) {
 	}
 }
 
-export function onClickReadMore(e: Event, goTo: string, params?: any) {
+export function onClickReadMore(e: Event, goTo: string, _params?: Record<string, unknown>) {
 	scrollToDiv(e, goTo);
-	// ga('readmore_btn_click', params);
+	// ga('readmore_btn_click', _params);
 }

@@ -42,17 +42,26 @@ type Probability = {
 	scaledLogit: number;
 	expLogit: number;
 	probability: number;
-	topKLogit?: number;
+	topKLogit?: number | null;
 	topPProbability?: number;
 	cumulativeProbability?: number;
 	cutoffIndex?: number;
 };
 type Probabilities = Probability[];
 type ModelData = {
+	prompt?: string;
+	tokens?: string[];
+	tokenIds?: number[];
 	logits: number[];
-	outputs: Record<string, { data: number[][]; dims: number[]; size: number }>;
+	outputs: Record<string, { data: (number | null)[][]; dims?: number[]; size?: number }>;
 	probabilities: Probabilities;
 	sampled: Probability;
 };
 
 type Sampling = { type: 'top-k' | 'top-p'; value: number };
+
+interface Window {
+	dataLayer?: Array<Record<string, unknown>>;
+}
+
+declare function gtag(...args: unknown[]): void;
