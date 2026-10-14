@@ -61,7 +61,7 @@ _Proceedings of the 2026 CHI Conference on Human Factors in Computing Systems._
 
 #### Prerequisites
 
-- Node.js v20 or higher
+- Node.js v20.19+, v22.13+, or v24+
 - NPM v10 or higher
 
 #### Steps
@@ -72,6 +72,8 @@ cd transformer-explainer
 npm ci
 npm run dev
 ```
+
+`npm ci` prepares the SvelteKit-generated TypeScript configuration automatically.
 
 Then, on your web browser, access http://localhost:5173.
 
