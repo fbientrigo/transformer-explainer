@@ -16,18 +16,23 @@
 
 	const lineHeight = 1;
 
-	$: colorKey = typeof colorScale === 'string' ? colorScale : 'gray';
+	$: colorKey =
+		typeof colorScale === 'string' && colorScale in theme.colors
+			? (colorScale as keyof typeof theme.colors)
+			: 'gray';
 	$: color =
 		typeof colorScale === 'function'
 			? colorScale
 			: d3.interpolate(theme.colors[colorKey][100], theme.colors[colorKey][400]);
 
-	function drawCanvas() {
+	function drawCanvas(colorForValue: (value: number, index: number) => string) {
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
 
-		const width = canvas.parentElement.clientWidth;
-		const height = canvas.parentElement.clientHeight;
+		const parent = canvas.parentElement;
+		if (!parent) return;
+		const width = parent.clientWidth;
+		const height = parent.clientHeight;
 
 		ctx.clearRect(0, 0, width, height);
 
@@ -39,20 +44,20 @@
 
 		for (let i = 0; i < height / lineHeight; i++) {
 			const value = data[i];
-			ctx.fillStyle = color(value);
+			ctx.fillStyle = colorForValue(value, i);
 			ctx.fillRect(0, i * lineHeight * pixelRatio, width * pixelRatio, lineHeight * pixelRatio);
 		}
 	}
 
 	onMount(() => {
-		const unsubscribe = vectorHeight.subscribe(drawCanvas);
+		const unsubscribe = vectorHeight.subscribe(() => drawCanvas(color));
 		return () => {
 			unsubscribe();
 		};
 	});
 
-	$: if (data && canvas && color) {
-		drawCanvas();
+	$: if (data && canvas) {
+		drawCanvas(color);
 	}
 </script>
 

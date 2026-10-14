@@ -8,10 +8,10 @@
 	export let title: string;
 	export let className: string | undefined = undefined;
 	export let isAnimationActive: boolean = false;
-	export let timeline;
+	export let timeline: GSAPTimeline;
 	export let isOpen: boolean = true;
 
-	let startTime;
+	let startTime = 0;
 
 	onMount(() => {
 		startTime = performance.now();
@@ -51,6 +51,7 @@
 			{#if isAnimationActive}
 				<button
 					class="play-control forward"
+				aria-label="Finish animation"
 					data-click="matrix-calc-forward-btn"
 					on:click={(e) => {
 						e.stopPropagation();
@@ -76,6 +77,7 @@
 			{:else}
 				<button
 					class="play-control restart"
+				aria-label="Restart animation"
 					data-click="matrix-calc-restart-btn"
 					on:click={(e) => {
 						e.stopPropagation();
@@ -104,6 +106,7 @@
 			{/if}
 			<button
 				class="close"
+				aria-label="Close"
 				data-click="matrix-calc-close-btn"
 				on:click={(e) => {
 					e.stopPropagation();

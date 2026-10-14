@@ -4,6 +4,7 @@
 	import resolveConfig from 'tailwindcss/resolveConfig';
 
 	const { theme } = resolveConfig(tailwindConfig);
+	type MatrixCell = { cell: number | null; rowIndex: number; colIndex: number };
 
 	export let data: (number | null)[][];
 	export let cellHeight: number;
@@ -17,32 +18,32 @@
 
 	export let groupBy: 'row' | 'col' = 'row';
 	export let shape: 'circle' | 'rect' = 'rect';
-	export let colorScale: string | ((t: number, i: number) => string) | undefined = undefined;
+	export let colorScale: string | ((t: number, i: number) => string | number) | undefined = undefined;
 
-	export let onMouseOverCell: (
+	export let onMouseOverCell: ((
 		event: Event,
-		data: any,
+		data: MatrixCell,
 		el?: SVGRectElement | d3.BaseType
-	) => void | undefined;
-	export let onMouseOutCell: (
+	) => void) | undefined = undefined;
+	export let onMouseOutCell: ((
 		event: Event,
-		data: any,
+		data: MatrixCell,
 		el?: SVGRectElement | d3.BaseType
-	) => void | undefined;
-	export let onMouseOutSvg: (
+	) => void) | undefined = undefined;
+	export let onMouseOutSvg: ((
 		event: Event,
-		data: any,
+		data: unknown,
 		el?: SVGRectElement | d3.BaseType
-	) => void | undefined;
+	) => void) | undefined = undefined;
 	export let showTooltip: (
 		event: Event,
-		data: any,
+		data: number | null,
 		el: SVGRectElement | d3.BaseType
-	) => string | undefined;
-	export let highlightRow: number | undefined;
-	export let highlightCol: number | undefined;
+	) => string | undefined = () => undefined;
+	export let highlightRow: number | undefined = undefined;
+	export let highlightCol: number | undefined = undefined;
 
-	let svgEl: HTMLOrSVGElement;
+	let svgEl: SVGSVGElement;
 
 	$: svgWidth =
 		groupBy === 'col'
@@ -53,7 +54,10 @@
 			? dimension * cellHeight + (dimension - 1) * rowGap
 			: rowLen * cellHeight + (rowLen - 1) * rowGap;
 
-	const colorKey = typeof colorScale === 'string' ? colorScale : 'blue';
+	const colorKey =
+		typeof colorScale === 'string' && colorScale in theme.colors
+			? (colorScale as keyof typeof theme.colors)
+			: 'blue';
 	const matrixColorScale =
 		typeof colorScale === 'function'
 			? colorScale
@@ -62,7 +66,7 @@
 	const drawMatrixSvg = () => {
 		const svg = d3.select(svgEl);
 
-		if (!!onSvgOut) svg.on('mouseleave', onSvgOut);
+		if (onSvgOut) svg.on('mouseleave', onSvgOut);
 
 		let cells;
 
@@ -92,7 +96,7 @@
 					.attr('width', cellWidth)
 					.attr('height', cellHeight)
 					.attr('fill', function (d) {
-						return matrixColorScale(d.cell, d.colIndex);
+						return d.cell === null ? theme.colors.gray[200] : matrixColorScale(d.cell, d.colIndex);
 					})
 					.on('mouseenter', onCellOver)
 					.on('mouseleave', onCellOut);
@@ -114,7 +118,7 @@
 					.attr('r', cellWidth / 2)
 					.attr('stroke', theme.colors.gray[500])
 					.attr('fill', function (d, i) {
-						return matrixColorScale(d.cell, i);
+						return d.cell === null ? theme.colors.gray[200] : matrixColorScale(d.cell, i);
 					})
 					.on('mouseenter', onCellOver)
 					.on('mouseleave', onCellOut);
@@ -156,7 +160,7 @@
 					.on('mouseenter', onCellOver)
 					.on('mouseleave', onCellOut)
 					.attr('fill', function (d, i) {
-						if (!Number.isFinite(d.cell)) return theme.colors.gray[200];
+						if (d.cell === null || !Number.isFinite(d.cell)) return theme.colors.gray[200];
 						return matrixColorScale(d.cell, i);
 					});
 			}
@@ -200,7 +204,7 @@
 					.transition()
 					.duration(100)
 					.attr('fill', function (d, i) {
-						if (!Number.isFinite(d.cell)) return theme.colors.gray[200];
+						if (d.cell === null || !Number.isFinite(d.cell)) return theme.colors.gray[200];
 						return matrixColorScale(d.cell, i);
 					});
 			}
@@ -208,16 +212,16 @@
 	};
 
 	$: if (data && svgEl) {
-		drawMatrixSvg(data);
+		drawMatrixSvg();
 	}
 
 	// highlighting
-	let animationFrame;
+	let animationFrame: number;
 	$: {
 		cancelAnimationFrame(animationFrame);
 		animationFrame = requestAnimationFrame(() => {
-			d3.select(svgEl)
-				.selectAll(shape)
+			d3.select<SVGSVGElement, unknown>(svgEl)
+				.selectAll<SVGElement, MatrixCell>(shape)
 				.attr('class', function (d) {
 					const rowIdx = d.rowIndex;
 					const colIdx = d.colIndex;
@@ -234,41 +238,42 @@
 					} else if (highlightCol !== undefined) {
 						classname = colIdx === highlightCol ? 'cell highlight' : 'cell dim';
 					}
-					return classname;
+					return classname ?? 'cell';
 				});
 		});
 	}
 
 	// tooltip
-	let tooltipData = null;
+	let tooltipData: string | { component: import('svelte').ComponentType; props?: Record<string, unknown> } | null = null;
 	let tooltipVisible = false;
 	let tooltipX = 0;
 	let tooltipY = 0;
 
-	function onCellOver(e, d) {
+	function onCellOver(this: d3.BaseType, e: Event, d: MatrixCell) {
 		const el = this;
 		onMouseOverCell?.(e, d, el);
 
-		const tooltipData = showTooltip?.(e, d.cell);
+		const tooltipData = showTooltip?.(e, d.cell, el);
 		if (tooltipData) visibleTooltip(e, tooltipData);
 	}
 
-	function onCellOut(e, d) {
+	function onCellOut(this: d3.BaseType, e: Event, d: MatrixCell) {
 		const el = this;
 		onMouseOutCell?.(e, d, el);
 		hideTooltip();
 	}
 
-	function onSvgOut(e, d) {
+	function onSvgOut(e: Event, d: unknown) {
 		onMouseOutSvg?.(e, d);
 		hideTooltip();
 	}
 
-	function visibleTooltip(event, data) {
+	function visibleTooltip(event: Event, data: string | { component: import('svelte').ComponentType; props?: Record<string, unknown> }) {
 		tooltipData = data;
 		tooltipVisible = true;
 
-		const parentBbox = svgEl?.getBoundingClientRect();
+		const parentBbox = svgEl.getBoundingClientRect();
+		if (!(event.target instanceof Element)) return;
 		const bbox = event.target.getBoundingClientRect();
 
 		tooltipX = bbox.left + bbox.width / 2 - parentBbox.left;
@@ -295,7 +300,7 @@
 		>
 			{#if typeof tooltipData === 'string'}
 				{tooltipData}
-			{:else}
+			{:else if tooltipData}
 				<svelte:component this={tooltipData.component} {...tooltipData?.props} />
 			{/if}
 			<div

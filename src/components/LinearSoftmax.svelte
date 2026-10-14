@@ -30,7 +30,7 @@
 
 	setContext('block-id', 'softmax');
 
-	const blockId = getContext('block-id');
+	const blockId = getContext<string>('block-id');
 
 	let isSoftmaxExpanded = false;
 	let showLogitPopover = false;
@@ -51,7 +51,7 @@
 		}
 	};
 
-	const onClickSoftmaxTitle = (e) => {
+	const onClickSoftmaxTitle = (e: MouseEvent | KeyboardEvent) => {
 		e.stopPropagation();
 		e.preventDefault();
 		textPages.find((page) => page.id === 'output-probabilities')?.out();
@@ -66,15 +66,17 @@
 	};
 	let expandableEl: HTMLDivElement;
 
-	function handleOutsideClick(e) {
-		if (isSoftmaxExpanded && !expandableEl.contains(e.target)) {
+	function handleOutsideClick(e: Event) {
+		if (isSoftmaxExpanded && e.target instanceof Node && !expandableEl.contains(e.target)) {
 			expandedBlock.set({ id: null });
 		}
 	}
 	onMount(() => {
-		document.querySelector('.main-section').addEventListener('click', handleOutsideClick);
+		const mainSection = document.querySelector('.main-section');
+		if (!mainSection) return;
+		mainSection.addEventListener('click', handleOutsideClick);
 		return () => {
-			document.querySelector('.main-section').removeEventListener('click', handleOutsideClick);
+			mainSection.removeEventListener('click', handleOutsideClick);
 		};
 	});
 
@@ -84,7 +86,7 @@
 	let drawBars: () => void;
 
 	// google analytics
-	let startTime = null;
+	let startTime = 0;
 
 	const expandSoftmax = async () => {
 		containerState = Flip.getState('.softmax .softmax-detail.expandable');
@@ -171,7 +173,7 @@
 	// top-p
 	$: topPProbabilities = data?.map((d) => d.topPProbability) || [];
 	$: cumulativeProbabilities = data?.map((d) => d.cumulativeProbability) || [];
-	$: cutoffIndex = data?.[0].cutoffIndex;
+	$: cutoffIndex = data?.[0]?.cutoffIndex ?? -1;
 
 	let isHovered = false;
 
@@ -183,7 +185,7 @@
 		isHovered = false;
 	}
 
-	const onClickLogits = (e) => {
+	const onClickLogits = (e: MouseEvent) => {
 		e.stopPropagation();
 		e.preventDefault();
 		showLogitPopover = !showLogitPopover;
@@ -250,13 +252,14 @@
 						<div class="title-text">Tokens</div>
 					</div>
 					<div class="title-box logits">
-						<div
+						<button
+							type="button"
 							class="title-text btn shadow-sm"
 							on:click={onClickLogits}
 							data-click="prob-expansion-logit-btn"
 						>
 							Logits <EyeOutline class="icon text-gray-400" size="sm" />
-						</div>
+						</button>
 					</div>
 					<div class="title-box scaled">
 						<TextbookTooltip id="temperature"
@@ -413,7 +416,7 @@
 		z-index: $TOOLTIP_INDEX;
 	}
 	.softmax {
-		.top-k-line {
+		:global(.top-k-line) {
 			width: 100%;
 			height: 1px;
 			background: theme('colors.purple.500');
@@ -539,7 +542,7 @@
 			.strike {
 				text-decoration: line-through;
 			}
-			.current {
+		:global(.current) {
 				transform: translateY(0);
 			}
 
@@ -584,7 +587,7 @@
 		.second-column {
 			position: relative;
 
-			.dim {
+		:global(.dim) {
 				user-select: none;
 				position: absolute;
 				bottom: 0;

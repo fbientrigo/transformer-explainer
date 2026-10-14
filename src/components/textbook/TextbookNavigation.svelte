@@ -8,11 +8,9 @@
 		userId
 	} from '~/store';
 	import type { TextbookPage } from '~/utils/textbookPages';
+	import { getKeyboardPageIndex } from '~/utils/textbookNavigation.js';
 
 	export let textPages: TextbookPage[];
-	export let isMouseInCard: boolean = false;
-	export let isLeftSide: boolean = true;
-
 	let showPageDropdown = false;
 	let isDragging = false;
 	let progressBarElement: HTMLElement;
@@ -107,8 +105,20 @@
 		navigatePage('next');
 	}
 
-	$: showLeftArrow = true;
-	$: showRightArrow = true;
+	function handleNavigationKeydown(event: KeyboardEvent, direction: 'prev' | 'next') {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			navigatePage(direction);
+		}
+	}
+
+	function handleProgressKeydown(event: KeyboardEvent) {
+		const rect = progressBarElement.getBoundingClientRect();
+		const target = getKeyboardPageIndex(event, $textbookCurrentPage, textPages.length);
+		if (target === null) return;
+		updatePageFromPosition(rect.left + rect.width * (target + 0.5) / textPages.length, 'progress-bar-keyboard');
+	}
+
 </script>
 
 <svelte:window on:mousemove={handleGlobalMouseMove} on:mouseup={handleGlobalMouseUp} />
@@ -116,12 +126,10 @@
 <!-- Navigation Footer -->
 <div class="navigation-footer">
 	<!-- Left navigation area -->
-	<div class="nav-section left" on:click={handleLeftClick} role="button" tabindex="0">
-		{#if showLeftArrow}
-			<div class="nav-arrow-circle">
-				<AngleLeftOutline size="sm" />
-			</div>
-		{/if}
+	<div class="nav-section left" on:click={handleLeftClick} on:keydown={(event) => handleNavigationKeydown(event, 'prev')} role="button" tabindex="0">
+		<div class="nav-arrow-circle">
+			<AngleLeftOutline size="sm" />
+		</div>
 	</div>
 
 	<!-- Center section with progress and page counter -->
@@ -130,8 +138,14 @@
 			class="progress-bar"
 			bind:this={progressBarElement}
 			on:click={handleProgressClick}
+			on:keydown={handleProgressKeydown}
 			on:mousedown={handleProgressMouseDown}
-			role="button"
+			role="slider"
+			aria-label="Textbook page"
+			aria-orientation="horizontal"
+			aria-valuemin="1"
+			aria-valuemax={textPages.length}
+			aria-valuenow={$textbookCurrentPage + 1}
 			tabindex="0"
 		>
 			<div
@@ -153,7 +167,7 @@
 			</button>
 			{#if showPageDropdown}
 				<div class="page-dropdown">
-					{#each textPages as page, index}
+				{#each textPages as page, index (page.id)}
 						<button
 							class="dropdown-item"
 							class:active={$textbookCurrentPage === index}
@@ -185,12 +199,10 @@
 	</div>
 
 	<!-- Right navigation area -->
-	<div class="nav-section right" on:click={handleRightClick} role="button" tabindex="0">
-		{#if showRightArrow}
-			<div class="nav-arrow-circle">
-				<AngleRightOutline size="sm" />
-			</div>
-		{/if}
+	<div class="nav-section right" on:click={handleRightClick} on:keydown={(event) => handleNavigationKeydown(event, 'next')} role="button" tabindex="0">
+		<div class="nav-arrow-circle">
+			<AngleRightOutline size="sm" />
+		</div>
 	</div>
 </div>
 

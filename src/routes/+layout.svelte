@@ -103,7 +103,7 @@ import '~/workshop/presentation.css';
 </div> -->
 
 <style lang="scss">
-	.alert {
+	:global(.alert) {
 		position: fixed;
 		bottom: 1rem;
 		left: 1rem;

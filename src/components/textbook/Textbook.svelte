@@ -18,7 +18,7 @@
 	$: if (showTextCard) {
 		handlePageTransition($textbookCurrentPage, $textbookPreviousPage);
 	} else {
-		if ($textbookPreviousPage >= 0 && textPages[$textbookPreviousPage]?.out) {
+		if ($textbookPreviousPage >= 0) {
 			textPages[$textbookPreviousPage].out();
 		}
 		textbookPreviousPage.set(-1);
@@ -35,7 +35,7 @@
 </script>
 
 <!-- Floating Book Button -->
-{#if !showTextCard}
+			{#if showTextCard === false}
 	<div class="floating-container" transition:fade={{ duration: 150 }}>
 		<GradientButton
 			pill={true}
@@ -69,7 +69,7 @@
 		z-index: $TEXTBOOK_INDEX;
 	}
 
-	.floating-btn {
+	:global(.floating-btn) {
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 		transition: all 0.2s ease;
 
@@ -105,10 +105,8 @@
 	}
 
 	// page - transformer
-	:global(.generate-button) {
-		.highlight-text {
-			display: none;
-		}
+	:global(.generate-button .highlight-text) {
+		display: none;
 	}
 	:global(.input-form.textbook-highlight .input-btn-group) {
 		transition: box-shadow 0.2s ease-in-out;
@@ -484,18 +482,12 @@
 	}
 
 	// residual
-	:global(.operation-col.residual.textbook-highlight) {
-		// pointer-events: none;
-	}
 	:global(.residual-start.textbook-highlight .residual-text) {
 		color: theme('colors.gray.600') !important;
 		background: var(--textbook-highlight-background) !important;
 	}
 
 	// ln, dropout
-	:global(.operation-col.textbook-highlight) {
-		// pointer-events: none;
-	}
 	:global(.operation-col.textbook-highlight .icon) {
 		opacity: 0 !important;
 	}

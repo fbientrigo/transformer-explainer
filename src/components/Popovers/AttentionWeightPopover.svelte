@@ -40,22 +40,22 @@
 		);
 
 	// color scale
-	const valueColorScale = (d, i) => {
+	const valueColorScale = (d: number, _i: number): string => {
 		return d3.interpolate(theme.colors['green'][100], theme.colors['green'][400])(d);
 	};
 
-	const outColorScale = (d, i) => {
+	const outColorScale = (d: number, _i: number): string => {
 		return d3.interpolate(theme.colors['purple'][100], theme.colors['purple'][400])(d);
 	};
 
-	const softmaxColorScale = (d, i) => {
+	const softmaxColorScale = (d: number, _i: number): string => {
 		return d3.interpolate('white', theme.colors['purple'][700])(d);
 	};
 
 	// animation
 	let isAnimationActive = false;
 	let progress = 0;
-	let timeline = gsap.timeline();
+	let timeline: GSAPTimeline = gsap.timeline();
 
 	onMount(() => {
 		timeline.eventCallback('onUpdate', () => {
@@ -72,7 +72,6 @@
 	onDestroy(() => {
 		if (timeline) {
 			timeline.kill();
-			timeline = null;
 		}
 	});
 
@@ -244,7 +243,7 @@
 	let highlightCol: number | undefined = undefined;
 	let highlightRow: number | undefined = undefined;
 
-	const onMouseOverCell = (e, d) => {
+	const onMouseOverCell = (_e: Event, d: { cell: number | null; rowIndex: number; colIndex: number }) => {
 		if (isAnimationActive) return;
 		highlightRow = d.rowIndex;
 		highlightCol = d.colIndex;

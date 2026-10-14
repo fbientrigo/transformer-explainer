@@ -44,7 +44,7 @@
 	$: exceedLimit = inputTextTemp.split(' ').length >= wordLimit;
 
 	// Text input
-	const onFocusInput = (e) => {
+	const onFocusInput = (_e?: FocusEvent | MouseEvent) => {
 		let formattedString = (inputTextTemp + predictedTokenTemp).replace(/[\s\n]+/g, ' ');
 
 		inputTextTemp = formattedString;
@@ -55,18 +55,18 @@
 		inputRef.innerText = inputTextTemp;
 	};
 
-	const onInput = (e) => {
+	const onInput = (_e: Event) => {
 		inputTextTemp = inputRef.innerText;
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = (e: Event) => {
 		if (disabled || exceedLimit) return;
 		// Complete any running animation before starting new generation
 		completeCurrentAnimation();
 
 		setTimeout(() => {
 			onFocusInput();
-			textPages.find((page) => page.id === 'how-transformers-work')?.complete();
+			textPages.find((page) => page.id === 'how-transformers-work')?.complete?.();
 
 			inputText.set(inputTextTemp);
 
@@ -88,7 +88,7 @@
 		}, 0);
 	};
 
-	const handleKeyDown = (e) => {
+	const handleKeyDown = (e: KeyboardEvent) => {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			if (disabled || exceedLimit) return;
@@ -100,9 +100,9 @@
 
 	// Example select box
 	let dropdownOpen = false;
-	const onSelectExample = (d, i) => {
+	const onSelectExample = (d: string, i: number) => {
 		if ($isFetchingModel) {
-			textPages.find((page) => page.id === 'how-transformers-work')?.complete();
+			textPages.find((page) => page.id === 'how-transformers-work')?.complete?.();
 		}
 
 		dropdownOpen = false;
@@ -121,11 +121,12 @@
 		useCustomInput = false;
 	};
 
-	const moveCursorToEnd = (element) => {
+	const moveCursorToEnd = (element: HTMLDivElement) => {
 		const range = document.createRange();
 		const sel = window.getSelection();
 		range.selectNodeContents(element);
 		range.collapse(false);
+		if (!sel) return;
 		sel.removeAllRanges();
 		sel.addRange(range);
 		element.focus();
@@ -158,7 +159,7 @@
 				{#each inputTextExample as text, index}
 					<DropdownItem
 						data-click={`dropdown-item-${index}`}
-						class={$selectedExampleIdx === index && 'active'}
+						class={$selectedExampleIdx === index ? 'active' : ''}
 						on:click={() => {
 							onSelectExample(text, index);
 						}}>{text}</DropdownItem
@@ -192,7 +193,9 @@
 						on:click={(e) => {
 							e.stopPropagation();
 						}}
-						role="input"
+						role="textbox"
+						aria-multiline="true"
+		tabindex="0"
 					>
 						{inputTextTemp}
 					</div>
@@ -302,7 +305,7 @@
 
 			.text-box {
 				white-space: nowrap;
-				br {
+				:global(br) {
 					display: none;
 				}
 

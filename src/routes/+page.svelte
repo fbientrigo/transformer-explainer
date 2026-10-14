@@ -331,7 +331,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 			.hide {
 				display: none;
 			}
-			&.animate-forward {
+			&:global(.animate-forward) {
 				.block-steps,
 				.transition-watch {
 					animation-duration: 800ms;
@@ -351,7 +351,7 @@ import { requestModelLoad, modelLoadError } from '~/workshop/state';
 				}
 			}
 
-			&.animate-backward {
+			&:global(.animate-backward) {
 				.block-steps,
 				.transition-watch {
 					animation-duration: 800ms;

@@ -12,7 +12,7 @@
 	export let active: boolean = false;
 
 	let width = 50;
-	let textElement: SVGTextElement;
+	let textElement!: SVGTextElement;
 	let textBBox: DOMRect;
 
 	onMount(() => {

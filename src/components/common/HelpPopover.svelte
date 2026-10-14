@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { Popover } from 'flowbite-svelte';
+	import type { PopoverProps } from 'flowbite-svelte/Popover.svelte';
 	import { userId } from '~/store';
 	import { onClickReadMore } from '~/utils/event';
 
 	export let id: string;
-	export let placement: string = 'bottom';
+	export let placement: PopoverProps['placement'] = 'bottom';
 	export let goTo: string | undefined = undefined;
 	export let textbook: string | undefined = undefined;
 
-	let startTime;
-	const onShow = (e) => {
+	let startTime = 0;
+	const onShow = (e: CustomEvent<boolean>) => {
 		startTime = e.timeStamp;
 		window.dataLayer?.push({
 			event: 'visibility-show',
@@ -18,7 +19,7 @@
 			user_id: $userId
 		});
 	};
-	const onHide = (e) => {
+	const onHide = (e: CustomEvent<boolean>) => {
 		window.dataLayer?.push({
 			event: 'visibility-hide',
 			visible_name: `help-popover-${id}`,
@@ -67,13 +68,14 @@
 			</div>
 		{/if}
 		{#if goTo}
-			<div
+			<button
+				type="button"
 				data-click={`read-more-btn-${id}`}
-				class="more-btn mt-1 text-blue-600 hover:underline"
+				class="more-btn mt-1 border-0 bg-transparent p-0 text-blue-600 hover:underline"
 				on:click={(e) => onClickReadMore(e, goTo, { value: id })}
 			>
 				Read more
-			</div>
+			</button>
 		{/if}
 	</div></Popover
 >

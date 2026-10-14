@@ -24,19 +24,21 @@
 	let attentionPos = { left: 0, top: 0 };
 	let softmaxPos = { left: 0, top: 0 };
 
-	let popoverEl: HTMLElement = null;
+	let popoverEl: HTMLElement | null = null;
 
-	function handleOutsideClick(e) {
-		if (!!$weightPopover && !popoverEl.contains(e.target)) {
+	function handleOutsideClick(e: Event) {
+		if ($weightPopover && popoverEl && e.target instanceof Node && !popoverEl.contains(e.target)) {
 			weightPopover.set(null);
 		}
 	}
 	// add global event
 	onMount(() => {
-		document.querySelector('.main-section').addEventListener('click', handleOutsideClick);
+		const mainSection = document.querySelector('.main-section');
+		if (!mainSection) return;
+		mainSection.addEventListener('click', handleOutsideClick);
 
 		return () => {
-			document.querySelector('.main-section').removeEventListener('click', handleOutsideClick);
+			mainSection.removeEventListener('click', handleOutsideClick);
 		};
 	});
 
@@ -44,30 +46,31 @@
 	onMount(() => {
 		const setPosition = () => {
 			const scrollLeft = window.scrollX;
-			const topbarHeight = document.querySelector('.top-bar')?.offsetHeight;
+			const topbarHeight = document.querySelector<HTMLElement>('.top-bar')?.offsetHeight;
 
-			const embedding = document.querySelector('.step.qkv .content');
-			const mlp = document.querySelector('.step.mlp .content');
-			const mlpDown = document.querySelector('.step.mlp .second-layer');
-			const attention = document.querySelector('.step.attention .content .multi-head');
-			const softmax = document.querySelector('.step.transformer-blocks .content');
+			const embedding = document.querySelector<HTMLElement>('.step.qkv .content');
+			const mlp = document.querySelector<HTMLElement>('.step.mlp .content');
+			const mlpDown = document.querySelector<HTMLElement>('.step.mlp .second-layer');
+			const attention = document.querySelector<HTMLElement>('.step.attention .content .multi-head');
+			const softmax = document.querySelector<HTMLElement>('.step.transformer-blocks .content');
 
-			const embeddingRect = embedding?.getBoundingClientRect();
-			const mlpRect = mlp?.getBoundingClientRect();
-			const mlpDownRect = mlpDown?.getBoundingClientRect();
-			const attentionRect = attention?.getBoundingClientRect();
-			const softmaxRect = softmax?.getBoundingClientRect();
+			if (!topbarHeight || !embedding || !mlp || !mlpDown || !attention || !softmax) return;
+			const embeddingRect = embedding.getBoundingClientRect();
+			const mlpRect = mlp.getBoundingClientRect();
+			const mlpDownRect = mlpDown.getBoundingClientRect();
+			const attentionRect = attention.getBoundingClientRect();
+			const softmaxRect = softmax.getBoundingClientRect();
 
-			qkvPos = { left: embeddingRect?.right + scrollLeft, top: embeddingRect?.top - topbarHeight };
-			mlpPos = { left: mlpRect?.left + scrollLeft, top: mlpRect?.top - topbarHeight };
-			mlpDownPos = { left: mlpDownRect?.left + scrollLeft, top: mlpDownRect?.top - topbarHeight };
+			qkvPos = { left: embeddingRect.right + scrollLeft, top: embeddingRect.top - topbarHeight };
+			mlpPos = { left: mlpRect.left + scrollLeft, top: mlpRect.top - topbarHeight };
+			mlpDownPos = { left: mlpDownRect.left + scrollLeft, top: mlpDownRect.top - topbarHeight };
 			attentionPos = {
-				left: attentionRect?.right + scrollLeft,
-				top: attentionRect?.top + attentionRect?.height / 2 - topbarHeight
+				left: attentionRect.right + scrollLeft,
+				top: attentionRect.top + attentionRect.height / 2 - topbarHeight
 			};
 			softmaxPos = {
-				left: softmaxRect?.left + scrollLeft,
-				top: softmaxRect?.top - topbarHeight
+				left: softmaxRect.left + scrollLeft,
+				top: softmaxRect.top - topbarHeight
 			};
 		};
 
@@ -80,7 +83,8 @@
 		elements.forEach((el) => resizeObserver.observe(el));
 
 		return () => {
-			document.querySelector('.main-section').removeEventListener('click', handleOutsideClick);
+			const mainSection = document.querySelector('.main-section');
+			mainSection?.removeEventListener('click', handleOutsideClick);
 		};
 	});
 
@@ -90,7 +94,7 @@
 	let x = 0;
 	let y = 0;
 
-	function handleMouseMove(e) {
+	function handleMouseMove(e: MouseEvent) {
 		x = e.clientX + 10;
 		y = e.clientY + 10;
 	}

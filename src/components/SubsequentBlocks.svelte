@@ -119,7 +119,7 @@
 				}
 			}
 		}
-		.column.initial .cell {
+		:global(.column.initial .cell) {
 			gap: 0.6rem;
 		}
 	}

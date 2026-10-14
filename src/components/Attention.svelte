@@ -156,9 +156,6 @@
 		z-index: $COLUMN_TITLE_INDEX;
 	}
 	.attention {
-		> .title > div {
-			// cursor: help;
-		}
 		&.expanded {
 			.title,
 			:global(.head-content) {

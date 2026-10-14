@@ -24,7 +24,7 @@
 		bind:value={$sampling.value}
 		valueText={`${$sampling.type === 'top-k' ? 'k' : 'p'}=${$sampling.value}`}
 		onClick={() => {
-			textPages.find((page) => page.id === 'sampling')?.complete();
+			textPages.find((page) => page.id === 'sampling')?.complete?.();
 		}}
 	>
 		<div class="sampling-type">
@@ -51,7 +51,7 @@
 						e.stopPropagation();
 					}}
 					on:change={(e) => {
-						e.target.checked && sampling.set({ type: 'top-k', value: 5 });
+						(e.currentTarget as HTMLInputElement).checked && sampling.set({ type: 'top-k', value: 5 });
 						window.dataLayer?.push({
 							event: 'sampling-selected',
 							sampling_type: 'top-k',
@@ -72,7 +72,7 @@
 						e.stopPropagation();
 					}}
 					on:change={(e) => {
-						e.target.checked && sampling.set({ type: 'top-p', value: 0.5 });
+						(e.currentTarget as HTMLInputElement).checked && sampling.set({ type: 'top-p', value: 0.5 });
 						window.dataLayer?.push({
 							event: 'sampling-selected',
 							sampling_type: 'top-p',

@@ -11,8 +11,6 @@
 
 	$: localizedPages = $language === 'es' ? textPages.map((page) => ({ ...page, ...(bookEs[page.id] || {}) })) : textPages;
 
-	let isMouseInCard = false;
-	let mousePosition = { x: 0, y: 0 };
 	let cardElement: HTMLDivElement;
 
 	// Draggable state
@@ -39,23 +37,6 @@
 			currentPage.out();
 		}
 		onClose();
-	}
-
-	function handleMouseMove(event: MouseEvent) {
-		if (!cardElement) return;
-		const rect = cardElement.getBoundingClientRect();
-		mousePosition = {
-			x: event.clientX - rect.left,
-			y: event.clientY - rect.top
-		};
-	}
-
-	function handleMouseEnter() {
-		isMouseInCard = true;
-	}
-
-	function handleMouseLeave() {
-		isMouseInCard = false;
 	}
 
 	// Drag functions
@@ -165,7 +146,6 @@
 				cardElement.style.setProperty('--card-cursor', 'grabbing');
 			}
 		}
-		handleMouseMove(event);
 	}
 
 	function startResize(event: MouseEvent, direction: string) {
@@ -236,7 +216,6 @@
 		return cursorMap[direction] || 'default';
 	}
 
-	$: isLeftSide = cardElement ? mousePosition.x < cardElement.offsetWidth / 2 : true;
 </script>
 
 <svelte:window on:mousemove={handleGlobalMouseMove} on:mouseup={handleGlobalMouseUp} />
@@ -251,10 +230,9 @@
 		bind:this={cardElement}
 		on:mousemove={handleCardMouseMove}
 		on:mousedown={handleCardMouseDown}
-		on:mouseenter={handleMouseEnter}
-		on:mouseleave={handleMouseLeave}
 		role="dialog"
 		aria-label="Textbook"
+		tabindex="-1"
 		style="width: {size.width}px; height: {size.height}px;"
 	>
 		<div class="card-header">
@@ -281,7 +259,7 @@
 					{/each}
 				</div>
 
-				<TextbookNavigation textPages={localizedPages} {isMouseInCard} {isLeftSide} />
+				<TextbookNavigation textPages={localizedPages} />
 			</div>
 		</div>
 	</div>

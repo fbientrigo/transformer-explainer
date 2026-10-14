@@ -1,9 +1,12 @@
-<script>
-	import { tokens, expandedBlock, modelData } from '~/store';
+<script lang="ts">
+	import { tokens } from '~/store';
 	import VectorCanvas from './VectorCanvas.svelte';
 
-	export let color;
-	export let data;
+	export let color: string;
+	export let data: number[] | undefined = undefined;
+	export let index: number;
+	export let isHovered: boolean = false;
+	export let isEmbeddingExpanded: boolean = false;
 </script>
 
 <div class={`vector ${color}`} class:last={index === $tokens.length - 1}>

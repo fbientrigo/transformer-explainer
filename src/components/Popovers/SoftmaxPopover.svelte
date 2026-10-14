@@ -10,7 +10,7 @@
 
 	$: data = $modelData?.probabilities || [];
 
-	function getStringNumber(num?: number, decimal = 2) {
+	function getStringNumber(num?: number | null, decimal = 2) {
 		if (num === -Infinity) return '-∞';
 		if (num === Infinity) return '∞';
 		else return num?.toFixed(decimal);
@@ -19,9 +19,10 @@
 	$: selected =
 		hoveredIndex !== null
 			? data[hoveredIndex]
-			: !!$predictedToken
+			: $predictedToken
 				? data[$predictedToken?.rank]
 				: data[0];
+	$: selectedCutoffIndex = selected?.cutoffIndex ?? -1;
 </script>
 
 <Card class={'softmax-popover popover bg-white text-sm'}>
@@ -122,7 +123,7 @@
 									<span class="condition text">
 										If cumulative prob ≤ {$sampling.value}
 									</span>
-									<span class="number" class:highlight={selected?.rank <= selected?.cutoffIndex}
+										<span class="number" class:highlight={selected?.rank <= selectedCutoffIndex}
 										>{getStringNumber(selected?.topPProbability)}</span
 									>
 								</div>
@@ -130,7 +131,7 @@
 									<span class="condition text"
 										>Otherwise <span
 											class="number infinity"
-											class:highlight={selected?.rank > selected?.cutoffIndex}>0</span
+											class:highlight={selected?.rank > selectedCutoffIndex}>0</span
 										></span
 									>
 								</div>
@@ -184,34 +185,34 @@
 				<div class="formula-step norm-step">
 					<div class="step-title">Normalization</div>
 					<div class="step-content">
-						{#if selected?.cutoffIndex >= selected?.rank}
+						{#if selectedCutoffIndex >= selected?.rank}
 							<div class="fraction">
 								<div class="frac-top">
 									<span
 										class="highlight number"
-										class:filtered={selected?.cutoffIndex >= selected?.rank}
+										class:filtered={selectedCutoffIndex >= selected?.rank}
 										>{getStringNumber(selected?.topPProbability)}</span
 									>
 								</div>
 								<div class="frac-line"></div>
 								<div class="frac-bottom">
 									{#each data.slice(0, 4) as item, idx}
-										{#if idx <= item.cutoffIndex}
+										{#if idx <= (item.cutoffIndex ?? -1)}
 											<div>
 												<span
 													class:highlight={idx === selected?.rank}
 													class="number"
 													class:filtered={true}
 													>{getStringNumber(
-														idx > item.cutoffIndex ? 0 : item.topPProbability
+												idx > (item.cutoffIndex ?? -1) ? 0 : item.topPProbability
 													)}</span
 												>
 
-												<span class="sum" class:active={idx !== item.cutoffIndex}>+</span>
+											<span class="sum" class:active={idx !== (item.cutoffIndex ?? -1)}>+</span>
 											</div>
 										{/if}
 									{/each}
-									{#if 4 <= selected?.cutoffIndex}
+									{#if 4 <= selectedCutoffIndex}
 										<div class:highlight={selected?.rank >= 5}>•••</div>
 									{/if}
 								</div>
@@ -254,7 +255,7 @@
 			width: 4rem;
 			white-space: nowrap;
 		}
-		.first-result {
+		:global(.first-result) {
 			margin: 0 -0.6rem;
 		}
 	}
@@ -384,7 +385,7 @@
 			font-weight: 800;
 		}
 	}
-	.softmax-popover-content {
+	:global(.softmax-popover-content) {
 		height: 100%;
 		padding: 1rem 2rem;
 		display: flex;
@@ -393,7 +394,7 @@
 		align-items: center;
 		gap: 1.5rem;
 
-		.desc {
+		:global(.desc) {
 			// font-style: italic;
 			color: theme('colors.gray.400');
 			font-weight: 300;

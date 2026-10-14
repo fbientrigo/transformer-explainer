@@ -2,17 +2,15 @@
 	import classNames from 'classnames';
 	import MatrixSvg from './MatrixSvg.svelte';
 
-	export let data: number[][];
+	export let data: (number | null)[][];
 	export let showSize: boolean | undefined | string = true;
 	export let cellHeight: number;
 	export let cellWidth: number;
 	export let rowGap: number = 2;
 	export let colGap: number = 0;
-	export let cellGap: number = 0;
-
 	export let groupBy: 'row' | 'col' = 'row';
 	export let shape: 'circle' | 'rect' = 'rect';
-	export let colorScale: string | ((t: number) => any) | undefined = undefined;
+	export let colorScale: string | ((t: number, i: number) => string | number) | undefined = undefined;
 
 	export let className: string | undefined = undefined;
 	export let title: string | undefined = undefined;
@@ -20,29 +18,29 @@
 
 	export let transpose: boolean = false;
 
-	export let onMouseOverCell: (
+	export let onMouseOverCell: ((
 		event: Event,
-		data: any,
+		data: { cell: number | null; rowIndex: number; colIndex: number },
 		el?: SVGRectElement | d3.BaseType
-	) => void | undefined;
-	export let onMouseOutCell: (
+	) => void) | undefined = undefined;
+	export let onMouseOutCell: ((
 		event: Event,
-		data: any,
+		data: { cell: number | null; rowIndex: number; colIndex: number },
 		el?: SVGRectElement | d3.BaseType
-	) => void | undefined;
-	export let onMouseOutSvg: (
+	) => void) | undefined = undefined;
+	export let onMouseOutSvg: ((
 		event: Event,
-		data: any,
+		data: unknown,
 		el?: SVGRectElement | d3.BaseType
-	) => void | undefined;
+	) => void) | undefined = undefined;
 	export let showTooltip: (
 		event: Event,
-		data: any,
+		data: number | null,
 		el: SVGRectElement | d3.BaseType
-	) => string | undefined;
+	) => string | undefined = () => undefined;
 
-	export let highlightRow: number | undefined;
-	export let highlightCol: number | undefined;
+	export let highlightRow: number | undefined = undefined;
+	export let highlightCol: number | undefined = undefined;
 
 	let rowLen: number = 0;
 	let dimension: number = 0;

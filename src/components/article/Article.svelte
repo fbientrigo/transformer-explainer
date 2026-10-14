@@ -108,7 +108,7 @@
 			embedding. Let’s see how each of these steps is done.
 		</p>
 		<div class="figure">
-			<img src="./article_assets/embedding.png" width="65%" />
+			<img src="./article_assets/embedding.png" width="65%" alt="Token and positional embeddings" />
 		</div>
 		<div class="figure-caption">
 			Figure <span class="attention">1</span>. Expanding the Embedding layer view, showing how the
@@ -228,7 +228,7 @@
 			<h4>Step 1: Query, Key, and Value Matrices</h4>
 
 			<div class="figure pt-10">
-				<img src="./article_assets/QKV.png" width="80%" />
+				<img src="./article_assets/QKV.png" width="80%" alt="Query, key, and value projections" />
 				<div class="text-xs">
 					<Katex
 						displayMode
@@ -295,7 +295,7 @@
 			</p>
 
 			<div class="figure">
-				<img src="./article_assets/attention.png" width="80%" align="middle" />
+				<img src="./article_assets/attention.png" width="80%" style="vertical-align: middle" alt="Causal self-attention" />
 			</div>
 			<div class="figure-caption">
 				Figure <span class="attention">3</span>. Using Query, Key, and Value matrices to calculate
@@ -341,7 +341,7 @@
 		<h3>MLP: Multi-Layer Perceptron</h3>
 
 		<div class="figure">
-			<img src="./article_assets/mlp.png" width="70%" align="middle" />
+			<img src="./article_assets/mlp.png" width="70%" style="vertical-align: middle" alt="Transformer MLP block" />
 		</div>
 		<div class="figure-caption">
 			Figure <span class="attention">4</span>. Using MLP layer to project the self-attention
@@ -393,7 +393,7 @@
 		</p>
 
 		<div class="figure py-5">
-			<img src="./article_assets/softmax.png" width="70%" />
+			<img src="./article_assets/softmax.png" width="70%" alt="Softmax token probabilities" />
 		</div>
 		<div class="figure-caption">
 			Figure <span class="attention">5</span>. Each token in the vocabulary is assigned a
@@ -537,6 +537,7 @@
 		<h2>Video Tutorial</h2>
 		<div class="video-container">
 			<iframe
+				title="Transformer Explainer video"
 				src="https://www.youtube.com/embed/ECR4oAwocjs"
 				frameborder="0"
 				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -622,9 +623,6 @@
 	.article-section {
 		padding-bottom: 2rem;
 	}
-	.architecture-section {
-		padding-top: 1rem;
-	}
 	.video-container {
 		position: relative;
 		padding-bottom: 56.25%; /* 16:9 aspect ratio */
@@ -682,7 +680,7 @@
 		margin: 1rem 0;
 	}
 
-	#description p img {
+	:global(#description p img) {
 		vertical-align: middle;
 	}
 
@@ -709,15 +707,15 @@
 		line-height: 1.6;
 	}
 
-	#description small {
+	:global(#description small) {
 		font-size: 0.8rem;
 	}
 
-	#description ol li img {
+	:global(#description ol li img) {
 		vertical-align: middle;
 	}
 
-	#description .video-link {
+	:global(#description .video-link) {
 		color: theme('colors.blue.600');
 		cursor: pointer;
 		font-weight: normal;
@@ -730,13 +728,13 @@
 		margin-bottom: 1rem;
 	}
 
-	#description a:hover,
-	#description .video-link:hover {
+	:global(#description a:hover),
+	:global(#description .video-link:hover) {
 		text-decoration: underline;
 	}
 
-	.figure,
-	.video {
+	:global(.figure),
+	:global(.video) {
 		width: 100%;
 		display: flex;
 		flex-direction: column;

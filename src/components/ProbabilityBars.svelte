@@ -13,7 +13,7 @@
 
 	const barHeight = 4;
 
-	let svgEl: HTMLOrSVGElement;
+	let svgEl: SVGSVGElement;
 
 	let percentPrecision = 2;
 
@@ -21,14 +21,15 @@
 	let hoverColor = theme.colors.purple[400];
 
 	export let drawBars = () => {
-		const data = $modelData?.probabilities;
+		const data: Probability[] | undefined = $modelData?.probabilities;
+		if (!data || !svgEl) return;
 
-		const svg = d3.select(svgEl);
+		const svg = d3.select<SVGSVGElement, unknown>(svgEl);
 
 		let xScale = d3
 			.scaleLinear()
-			.domain([0, d3.max(data, (d) => d.probability)])
-			.range([0, svgEl?.clientWidth - rootRem * 3]);
+			.domain([0, d3.max(data, (d) => d.probability) ?? 0])
+			.range([0, svgEl.clientWidth - rootRem * 3]);
 
 		const groups = svg
 			.selectAll('g.probability')
@@ -95,8 +96,8 @@
 					};
 				}
 				const i = d3.interpolateNumber(
-					that.text().replace('%', '').replace('<', ''),
-					(d.probability * 100).toFixed(percentPrecision)
+					Number(that.text().replace('%', '').replace('<', '')),
+					Number((d.probability * 100).toFixed(percentPrecision))
 				);
 				return function (t) {
 					let text = i(t).toFixed(percentPrecision) + '%';
@@ -127,8 +128,8 @@
 	// for hover and sampling
 	const updateColor = () => {
 		if (!svgEl) return;
-		const svg = d3.select(svgEl);
-		const groups = svg.selectAll('g.probability');
+		const svg = d3.select<SVGSVGElement, unknown>(svgEl);
+		const groups = svg.selectAll<SVGGElement, Probability>('g.probability');
 
 		groups.each(function (d, i) {
 			let color;

@@ -25,9 +25,3 @@
 		</Alert>
 	</div>
 {/if}
-
-<style lang="scss">
-	.alert-content {
-		// width: 30rem;
-	}
-</style>

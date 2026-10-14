@@ -51,23 +51,23 @@
 		);
 
 	// color scale
-	const embeddingColorScale = (d, i) => {
+	const embeddingColorScale = (d: number, _i: number): string => {
 		return d3.interpolate(theme.colors['purple'][100], theme.colors['purple'][400])(d);
 	};
-	const weightColorScale = (d, i) => {
+	const weightColorScale = (d: number, _i: number): string => {
 		return d3.interpolate(theme.colors['gray'][100], theme.colors['gray'][400])(d);
 	};
-	const out1ColorScale = (d, i) => {
+	const out1ColorScale = (d: number, _i: number): string => {
 		return d3.interpolate(theme.colors['indigo'][100], theme.colors['indigo'][400])(d);
 	};
-	const out2ColorScale = (d, i) => {
+	const out2ColorScale = (d: number, _i: number): string => {
 		return d3.interpolate(theme.colors['blue'][100], theme.colors['blue'][400])(d);
 	};
 
 	// animation
 	let isAnimationActive = false;
 	let progress = 0;
-	let timeline = gsap.timeline();
+	let timeline: GSAPTimeline = gsap.timeline();
 
 	onMount(() => {
 		timeline.eventCallback('onUpdate', () => {
@@ -84,7 +84,6 @@
 	onDestroy(() => {
 		if (timeline) {
 			timeline.kill();
-			timeline = null;
 		}
 	});
 
@@ -167,7 +166,6 @@
 						mulSymbol,
 						equalSymbol,
 						plusSymbol,
-						,
 						'.formula .first-row .part1',
 						'.formula .first-row .part2'
 					],
@@ -299,7 +297,7 @@
 	let highlightCol: number | undefined = undefined;
 	let highlightRow: number | undefined = undefined;
 
-	const onMouseOverCell = (e, d) => {
+	const onMouseOverCell = (_e: Event, d: { cell: number | null; rowIndex: number; colIndex: number }) => {
 		if (isAnimationActive) return;
 		highlightRow = d.rowIndex;
 		highlightCol = d.colIndex;
@@ -443,7 +441,7 @@
 	.operator {
 		position: relative;
 	}
-	.symbol.activation {
+	:global(.symbol.activation) {
 		font-size: 0.8rem;
 		font-weight: 500;
 	}

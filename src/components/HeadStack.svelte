@@ -82,15 +82,15 @@
 		}
 	});
 
-	let container;
-	let heads = [];
+	let container: HTMLDivElement;
+	let heads: Element[] = [];
 	let disablePagination = false;
 
 	onMount(() => {
 		heads = Array.from(container.children);
 	});
 
-	let tl;
+	let tl: GSAPTimeline | undefined;
 
 	const animateForwardTransition = () => {
 		if (tl) {
@@ -101,7 +101,9 @@
 
 		const shiftTime = 0.4;
 
-		const [firstHead, ...restHeads] = heads;
+		const firstHead = heads[0];
+		if (!firstHead) return;
+		const restHeads = heads.slice(1);
 
 		tl = gsap.timeline({
 			ease: Power1.easeOut,
@@ -110,7 +112,7 @@
 			},
 			onComplete: () => {
 				container.appendChild(firstHead);
-				heads.push(heads.shift());
+				heads = [...heads.slice(1), firstHead];
 				disablePagination = false;
 			}
 		});
@@ -191,6 +193,7 @@
 		const shiftTime = 0.4;
 
 		const lastHead = heads[heads.length - 1];
+		if (!lastHead) return;
 		const restHeads = heads.slice(0, -1);
 
 		tl = gsap.timeline({
@@ -200,7 +203,7 @@
 			},
 			onComplete: () => {
 				container.prepend(lastHead);
-				heads.unshift(heads.pop());
+				heads = [lastHead, ...heads.slice(0, -1)];
 				disablePagination = false;
 			}
 		});
@@ -273,7 +276,7 @@
 	};
 
 	const onClickNext = () => {
-		textPages.find((page) => page.id === 'multi-head')?.complete();
+		textPages.find((page) => page.id === 'multi-head')?.complete?.();
 
 		$attentionHeadIdxTemp =
 			$attentionHeadIdxTemp < $modelMeta.attention_head_num - 1 ? $attentionHeadIdxTemp + 1 : 0;
@@ -286,7 +289,7 @@
 	};
 
 	const onClickPrev = () => {
-		textPages.find((page) => page.id === 'multi-head')?.complete();
+		textPages.find((page) => page.id === 'multi-head')?.complete?.();
 
 		$attentionHeadIdxTemp =
 			$attentionHeadIdxTemp > 0 ? $attentionHeadIdxTemp - 1 : $modelMeta.attention_head_num - 1;
@@ -367,7 +370,7 @@
 	.head-content {
 		width: 100%;
 
-		.contents {
+		:global(.contents) {
 			width: 100%;
 		}
 	}

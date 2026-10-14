@@ -49,19 +49,20 @@
 		);
 
 	// color scale
-	const embeddingColorScale = (d, i) => {
+	const embeddingColorScale = (d: number, _i: number): string => {
 		return d3.interpolate(theme.colors['gray'][100], theme.colors['gray'][400])(d);
 	};
 
-	const qkvColorScale = (d, i) => {
-		let color = i < visibleDimension ? 'blue' : i < visibleDimension * 2 ? 'red' : 'green';
+	const qkvColorScale = (d: number, i: number): string => {
+		const color: keyof typeof theme.colors =
+			i < visibleDimension ? 'blue' : i < visibleDimension * 2 ? 'red' : 'green';
 		return d3.interpolate(theme.colors[color][100], theme.colors[color][400])(d);
 	};
 
 	// animation
 	let isAnimationActive = false;
 	let progress = 0;
-	let timeline = gsap.timeline();
+	let timeline: GSAPTimeline = gsap.timeline();
 
 	onMount(() => {
 		timeline.eventCallback('onUpdate', () => {
@@ -78,7 +79,6 @@
 	onDestroy(() => {
 		if (timeline) {
 			timeline.kill();
-			timeline = null;
 		}
 	});
 
@@ -292,7 +292,7 @@
 	let highlightCol: number | undefined = undefined;
 	let highlightRow: number | undefined = undefined;
 
-	const onMouseOverCell = (e, d) => {
+	const onMouseOverCell = (_e: Event, d: { cell: number | null; rowIndex: number; colIndex: number }) => {
 		if (isAnimationActive) return;
 		highlightRow = d.rowIndex;
 		highlightCol = d.colIndex;

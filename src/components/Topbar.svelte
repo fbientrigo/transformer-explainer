@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { ui } from '~/workshop/i18n';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -7,10 +7,10 @@
 	import { ga } from '~/utils/event';
 	import Sampling from '~/components/Sampling.svelte';
 
-	export let isActive;
+	export let isActive: boolean;
 
 	// Check if current page is about page
-	$: isAboutPage = $page.url.pathname === '/about';
+	$: isAboutPage = String($page.url.pathname) === '/about';
 </script>
 
 <div class="top-bar flex w-full items-center gap-4 px-10 py-2 pb-3" class:active={isActive}>
@@ -30,6 +30,7 @@
 			href="https://dl.acm.org/doi/pdf/10.1145/3772318.3791725"
 			target="_blank"
 			data-click="pdf-btn"
+			aria-label="Read the research paper (PDF)"
 		>
 			<svg
 				class="h-6 w-6 text-gray-800 dark:text-white"
@@ -48,7 +49,7 @@
 			</svg>
 		</a>
 		<!-- video -->
-		<a href="https://www.youtube.com/watch?v=ECR4oAwocjs" target="_blank" data-click="ytb-btn">
+		<a href="https://www.youtube.com/watch?v=ECR4oAwocjs" target="_blank" data-click="ytb-btn" aria-label="Watch the video">
 			<svg
 				class="h-6 w-6 text-gray-800 dark:text-white"
 				aria-hidden="true"
@@ -70,6 +71,7 @@
 			href="https://github.com/poloclub/transformer-explainer"
 			target="_blank"
 			data-click="github_btn"
+			aria-label="View the source code on GitHub"
 		>
 			<svg
 				class="h-6 w-6 text-gray-800 dark:text-white"
@@ -119,11 +121,8 @@
 				theme('colors.purple.500') 60%
 			);
 			-webkit-background-clip: text;
+			background-clip: text;
 			-webkit-text-fill-color: transparent;
-
-			.small {
-				font-size: 1.8rem;
-			}
 		}
 		.icons {
 			flex-shrink: 0;

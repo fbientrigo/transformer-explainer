@@ -59,7 +59,7 @@
 
 	let isAttentionExpanded = false;
 
-	const blockId = getContext('block-id');
+	const blockId = getContext<string | number | null>('block-id') ?? null;
 
 	// event handling
 
@@ -72,10 +72,10 @@
 		expandAttention();
 	}
 
-	const onClickAttention = (e) => {
+	const onClickAttention = (e: Event) => {
 		e.stopPropagation();
 		e.preventDefault();
-		textPages.find((page) => page.id === 'masked-self-attention')?.complete();
+		textPages.find((page) => page.id === 'masked-self-attention')?.complete?.();
 
 		if (!isAttentionExpanded) {
 			expandedBlock.set({ id: blockId });
@@ -84,15 +84,16 @@
 
 	let expandableEl: HTMLDivElement;
 
-	function handleOutsideClick(e) {
-		if (isAttentionExpanded && !expandableEl.contains(e.target)) {
+	function handleOutsideClick(e: Event) {
+		if (isAttentionExpanded && e.target instanceof Node && !expandableEl.contains(e.target)) {
 			expandedBlock.set({ id: null });
 		}
 	}
 	onMount(() => {
-		document.querySelector('.main-section').addEventListener('click', handleOutsideClick);
+		const mainSection = document.querySelector('.main-section');
+		mainSection?.addEventListener('click', handleOutsideClick);
 		return () => {
-			document.querySelector('.main-section').removeEventListener('click', handleOutsideClick);
+			mainSection?.removeEventListener('click', handleOutsideClick);
 		};
 	});
 
@@ -101,7 +102,7 @@
 	let collapseTl = gsap.timeline();
 
 	// google analytics
-	let startTime = null;
+	let startTime = 0;
 
 	const expandAttention = () => {
 		highlightAttentionPath();
@@ -110,14 +111,14 @@
 		isExpandOrCollapseRunning.set(true);
 		collapseTl.progress(1);
 
-		const keyPaths = document.querySelectorAll('div.sankey g.attention path.key-to-attention');
-		const queryPaths = document.querySelectorAll('div.sankey g.attention path.query-to-attention');
-		const outPaths = document.querySelectorAll('div.sankey g.attention path.to-attention-out');
+		const keyPaths = document.querySelectorAll<SVGPathElement>('div.sankey g.attention path.key-to-attention');
+		const queryPaths = document.querySelectorAll<SVGPathElement>('div.sankey g.attention path.query-to-attention');
+		const outPaths = document.querySelectorAll<SVGPathElement>('div.sankey g.attention path.to-attention-out');
 
 		[...keyPaths, ...queryPaths].forEach((path) => {
 			const length = path.getTotalLength();
-			path.style.strokeDasharray = length;
-			path.style.strokeDashoffset = length;
+			path.style.strokeDasharray = String(length);
+			path.style.strokeDashoffset = String(length);
 		});
 
 		const QKDuration = 1.2;
@@ -282,37 +283,38 @@
 	};
 
 	// color scale
-	$: qkColorScaleDomain = d3.extent(queryKey.flat());
-	$: qkColorScale = (d, i) => {
+	$: qkColorScaleDomain = d3.extent(queryKey.flat().filter((value): value is number => value !== null));
+	$: qkColorScale = (d: number, i: number) => {
+		if (!Number.isFinite(d)) return theme.colors.gray[200];
 		return d3
-			.scaleLinear()
-			.domain(qkColorScaleDomain)
+			.scaleLinear<string>()
+			.domain([qkColorScaleDomain[0] ?? 0, qkColorScaleDomain[1] ?? 0])
 			.range(['white', theme.colors['purple'][700]])(d);
 	};
-	const maskedColorScale = (d, i) => {
-		return d3.scaleLinear().domain([-3, 3]).range(['white', theme.colors['purple'][700]])(d);
+	const maskedColorScale = (d: number, i: number) => {
+		return d3.scaleLinear<string>().domain([-3, 3]).range(['white', theme.colors['purple'][700]])(d);
 	};
-	const softmaxColorScale = (d, i) => {
+	const softmaxColorScale = (d: number, i: number) => {
 		return d3.interpolate('white', theme.colors['purple'][700])(d);
 	};
 
-	const onMouseOverCell = (e, d, el) => {
+	const onMouseOverCell = (e: Event, d: { cell: number | null; rowIndex: number; colIndex: number }, el?: SVGRectElement | d3.BaseType) => {
 		const rowIdx = d.rowIndex;
 		const colIdx = d.colIndex;
 		hoveredMatrixCell.set({ row: rowIdx, col: colIdx });
-		if (Number.isFinite(d.cell)) {
+		if (el && Number.isFinite(d.cell)) {
 			d3.select(el).attr('stroke', theme.colors.gray[400]);
 		}
 	};
-	const onMouseOutCell = (e, d, el) => {
+	const onMouseOutCell = (e: Event, d: { cell: number | null; rowIndex: number; colIndex: number }, el?: SVGRectElement | d3.BaseType) => {
 		hoveredMatrixCell.set({ row: null, col: null });
-		if (Number.isFinite(d.cell)) {
+		if (el && Number.isFinite(d.cell)) {
 			d3.select(el).attr('stroke', !Number.isFinite(d.cell) ? 'none' : theme.colors.gray[200]);
 		}
 	};
 
-	const showTooltip = (e, d) => {
-		if (!Number.isFinite(d)) return;
+	const showTooltip = (e: Event, d: number | null) => {
+		if (d === null || !Number.isFinite(d)) return;
 		return d.toFixed(2);
 	};
 </script>

@@ -35,7 +35,7 @@
 		removeLine();
 	};
 
-	const typeToPageIdMap = {
+	const typeToPageIdMap: Record<string, string> = {
 		activation: 'mlp',
 		dropout: 'dropout',
 		ln: 'layer-normalization',
@@ -43,10 +43,11 @@
 		'residual-end': 'residual'
 	};
 
-	function openTextbookPage(e) {
+	function openTextbookPage(e: MouseEvent) {
 		e.preventDefault();
 		e.stopPropagation();
 
+		if (!type) return;
 		const pageId = typeToPageIdMap[type];
 		if (!pageId) return;
 

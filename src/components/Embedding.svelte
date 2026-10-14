@@ -31,7 +31,7 @@
 
 	setContext('block-id', 'embedding');
 
-	const blockId = getContext('block-id');
+	const blockId = getContext<string>('block-id');
 
 	let isEmbeddingExpanded = false;
 
@@ -51,10 +51,10 @@
 		}
 	};
 
-	const onClickEmbeddingTitle = (e) => {
+	const onClickEmbeddingTitle = (e: MouseEvent | KeyboardEvent) => {
 		e.stopPropagation();
 		e.preventDefault();
-		textPages.find((page) => page.id === 'embedding')?.complete();
+		textPages.find((page) => page.id === 'embedding')?.complete?.();
 
 		if (!isEmbeddingExpanded) {
 			expandedBlock.set({ id: blockId });
@@ -65,15 +65,17 @@
 
 	let expandableEl: HTMLDivElement;
 
-	function handleOutsideClick(e) {
-		if (isEmbeddingExpanded && !expandableEl.contains(e.target)) {
+	function handleOutsideClick(e: Event) {
+		if (isEmbeddingExpanded && e.target instanceof Node && !expandableEl.contains(e.target)) {
 			expandedBlock.set({ id: null });
 		}
 	}
 	onMount(() => {
-		document.querySelector('.main-section').addEventListener('click', handleOutsideClick);
+		const mainSection = document.querySelector('.main-section');
+		if (!mainSection) return;
+		mainSection.addEventListener('click', handleOutsideClick);
 		return () => {
-			document.querySelector('.main-section').removeEventListener('click', handleOutsideClick);
+			mainSection.removeEventListener('click', handleOutsideClick);
 		};
 	});
 
@@ -81,7 +83,7 @@
 	let containerState: any;
 
 	// google analytics
-	let startTime = null;
+	let startTime = 0;
 
 	const expandEmbedding = async () => {
 		containerState = Flip.getState('.embedding .token-column');
@@ -257,9 +259,9 @@
 							<div class={`vector ${embeddingVectorColor}`}>
 								<VectorCanvas
 									active
-									colorScale={(d, i) => {
+										colorScale={(d: number, _i: number) => {
 										return d3
-											.scaleDiverging()
+											.scaleLinear<string>()
 											.domain([0, 0.5, 1])
 											.range([theme.colors['red'][400], 'white', theme.colors['blue'][400]])(d);
 									}}

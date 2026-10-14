@@ -42,7 +42,7 @@
   }
 </script>
 
-<aside class="snapshot-panel" role="dialog" aria-modal="false" aria-label={copy.heading} data-model-inspector>
+<div class="snapshot-panel" role="dialog" aria-modal="false" aria-label={copy.heading} tabindex="-1" data-model-inspector>
   <div class="panel-header">
     <h2>{copy.heading}</h2>
     <button type="button" on:click={onClose} aria-label={copy.close}>×</button>
@@ -90,7 +90,7 @@
           {#each row as value, k}
             <div class="weight" title={'Q' + (q+1) + ' → K' + (k+1) + ': ' + value.toFixed(4)}
               style:background-color={'rgba(37, 99, 235, ' + Math.max(.035, value) + ')'}
-              aria-label={'Q' + (q + 1) + ' K' + (k + 1) + ': ' + value.toFixed(3)} />
+              aria-label={'Q' + (q + 1) + ' K' + (k + 1) + ': ' + value.toFixed(3)}></div>
           {/each}
         {/each}
       </div>
@@ -115,7 +115,7 @@
       <p>{copy.loss}: {snapshot.training.losses[0].loss.toFixed(3)} → {snapshot.training.losses[snapshot.training.losses.length - 1].loss.toFixed(3)} ({snapshot.training.device})</p>
     {/if}
   {/if}
-</aside>
+</div>
 
 <style>
   .snapshot-panel { position:fixed;right:1rem;top:1rem;z-index:10002; width:min(760px,calc(100vw - 2rem));max-height:calc(100vh - 7rem);overflow:auto;overscroll-behavior:contain;padding:1.1rem 1.3rem;background:#fff;color:#0f172a;border-radius:.85rem;border:1px solid #cbd5e1;box-shadow:0 12px 45px #0f172a38;font-family:system-ui,sans-serif;text-align:left }

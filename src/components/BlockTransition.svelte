@@ -27,8 +27,9 @@
 		}, timeout);
 	};
 
-	const animateForwardTransition = async ({ asyncTime } = {}) => {
-		const container = document.querySelector('.steps .blocks');
+	const animateForwardTransition = async ({ asyncTime }: { asyncTime?: number } = {}) => {
+		const container = document.querySelector<HTMLElement>('.steps .blocks');
+		if (!container) return;
 		await tick();
 
 		isOnBlockTransition.set(true);
@@ -45,8 +46,9 @@
 		}, duration);
 	};
 
-	const animateBackwardTransition = async ({ asyncTime } = {}) => {
-		const container = document.querySelector('.steps .blocks');
+	const animateBackwardTransition = async ({ asyncTime }: { asyncTime?: number } = {}) => {
+		const container = document.querySelector<HTMLElement>('.steps .blocks');
+		if (!container) return;
 		await tick();
 
 		isOnBlockTransition.set(true);
@@ -111,13 +113,14 @@
 	onMount(() => {
 		const setPosition = () => {
 			const scrollLeft = window.scrollX;
-			const topbarHeight = document.querySelector('.top-bar')?.offsetHeight;
+			const topbarHeight = document.querySelector<HTMLElement>('.top-bar')?.offsetHeight ?? 0;
 
-			const embedding = document.querySelector('.step.qkv .content .block-start-column');
+			const embedding = document.querySelector<HTMLElement>('.step.qkv .content .block-start-column');
 			const block =
 				$blockIdx === $modelMeta.layer_num - 1
-					? document.querySelector('.step.transformer-blocks .content .column.final')
-					: document.querySelector('.step.transformer-blocks .content');
+				? document.querySelector<HTMLElement>('.step.transformer-blocks .content .column.final')
+				: document.querySelector<HTMLElement>('.step.transformer-blocks .content');
+			if (!embedding || !block) return;
 
 			const embeddingRect = embedding.getBoundingClientRect();
 			const blockRect = block.getBoundingClientRect();
@@ -137,9 +140,9 @@
 		elements.forEach((el) => resizeObserver.observe(el));
 	});
 
-	const onClickNext = (e) => {
+	const onClickNext = (e: MouseEvent) => {
 		e.stopPropagation();
-		textPages.find((page) => page.id === 'blocks')?.complete();
+		textPages.find((page) => page.id === 'blocks')?.complete?.();
 
 		$blockIdxTemp = $blockIdxTemp < $modelMeta.layer_num - 1 ? $blockIdxTemp + 1 : 0;
 
@@ -150,9 +153,9 @@
 			user_id: $userId
 		});
 	};
-	const onClickPrev = (e) => {
+	const onClickPrev = (e: MouseEvent) => {
 		e.stopPropagation();
-		textPages.find((page) => page.id === 'blocks')?.complete();
+		textPages.find((page) => page.id === 'blocks')?.complete?.();
 
 		$blockIdxTemp = $blockIdxTemp > 0 ? $blockIdxTemp - 1 : $modelMeta.layer_num - 1;
 

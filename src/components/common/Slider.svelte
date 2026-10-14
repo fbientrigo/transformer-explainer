@@ -10,8 +10,8 @@
 	export let valueText: string;
 	export let onClick: (() => void) | undefined = undefined;
 
-	let startValue = null;
-	let endValue = null;
+	let startValue: string | undefined;
+	let endValue: string | undefined;
 
 	function handleMouseDown() {
 		startValue = valueText;

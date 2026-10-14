@@ -5,17 +5,14 @@
 	import { userId } from '~/store';
 	import { onClickReadMore } from '~/utils/event';
 
-	export let offset: PopoverProps['offset'] = undefined;
 	export let className: PopoverProps['class'] = undefined;
-	export let triggeredBy: PopoverProps['triggeredBy'] = undefined;
-	export let trigger: PopoverProps['trigger'] = 'hover';
 	export let placement: PopoverProps['placement'] = 'right';
 	export let title: PopoverProps['title'] = undefined;
 	export let goTo: string | undefined = undefined;
 	export let reference: PopoverProps['reference'] | undefined = undefined;
 
-	let startTime;
-	const onShow = (e) => {
+	let startTime = 0;
+	const onShow = (e: CustomEvent<boolean>) => {
 		startTime = e.timeStamp;
 		window.dataLayer?.push({
 			event: 'visibility-show',
@@ -24,7 +21,7 @@
 			user_id: $userId
 		});
 	};
-	const onHide = (e) => {
+	const onHide = (e: CustomEvent<boolean>) => {
 		window.dataLayer?.push({
 			event: 'visibility-hide',
 			visible_name: `help-popover-${className}`,
@@ -55,8 +52,9 @@
 	<div class="content">
 		<slot></slot>
 		{#if goTo}
-			<div
-				class="more-btn mt-1 text-blue-600 hover:underline"
+			<button
+				type="button"
+				class="more-btn mt-1 border-0 bg-transparent p-0 text-blue-600 hover:underline"
 				on:click={(e) =>
 					onClickReadMore(e, goTo, {
 						value: title
@@ -64,7 +62,7 @@
 				data-click={`read-more-btn-${className}`}
 			>
 				Read more
-			</div>
+			</button>
 		{/if}
 	</div></Popover
 >
